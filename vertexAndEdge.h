@@ -1,3 +1,6 @@
+#ifndef VERTEXANDEDGE_H
+#define VERTEXANDEDGE_H
+
 #include <random>
 #include <cmath>
 
@@ -41,3 +44,4 @@ public:
     float excavationCost() const;
 };
 
+#endif
