@@ -1,4 +1,4 @@
-#include "Graph.h"
+#include "vertexAndEdge.h"
 #include <random> // Para o gerador de números aleatórios
 #include <cmath>  // Para a função pow
 
