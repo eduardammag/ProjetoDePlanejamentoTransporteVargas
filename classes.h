@@ -1,8 +1,3 @@
-#include <iostream>
-#include <random>
-#include <cmath>
-using namespace std;
-
 class Vertex {
 public:
     bool m_isMetroStation;
