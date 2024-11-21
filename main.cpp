@@ -1,5 +1,9 @@
 #include <iostream>
 #include "classes.h"
+#include <random>
+#include <cmath>
+using namespace std;
+
 
 int main() {
     Vertex v1(true, 1);  
