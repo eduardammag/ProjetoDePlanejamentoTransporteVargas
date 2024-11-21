@@ -1,5 +1,5 @@
 #include <iostream>
-#include "classes.h"
+#include "vertexAndEdge.h"
 #include "graph.h"
 #include <random>
 #include <cmath>
@@ -26,8 +26,11 @@ int main() {
     cout << "Rua (8 dígitos): " << e.id_street() << endl;
     cout << "Taxa de Tráfego: " << e.trafficRate() << endl;
     cout << "Custo de Escavação: " << e.excavationCost() << endl;
-
+    cout << "-----------------" << endl;
     // teste da construção do grafo e representação em lista e matriz de adjacência
+    
+    cout << "\nTESTE CLASSE GRAPH" << endl;
+    cout << "-----------------" << endl;
     
     Graph g;
 
@@ -46,11 +49,9 @@ int main() {
     g.generateAdjacencyMatrix();
 
     // Imprime as representações
-    cout << "TESTE CLASSE GRAPH" << endl;
-    cout << "-----------------" << endl;
     g.printAdjacencyList();
     g.printAdjacencyMatrix();
+    cout << "-----------------" << endl;
 
     return 0;
 }
-
