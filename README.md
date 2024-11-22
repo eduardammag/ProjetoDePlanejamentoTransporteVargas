@@ -1,4 +1,4 @@
-## Trabalho de Planejamento de Meios de Transporte na cidade "Vargas"
+## Planejamento de Meios de Transporte na cidade "Vargas" usando C++
 
 ### Integrantes:
 - Ana Júlia Amaro Pereira Rocha
