@@ -1,6 +1,11 @@
 #include "graph.h"
 #include <iostream>
 #include <cmath>
+#include <string>
+#include <fstream>
+#include <sstream>
+
+using namespace std;
 
 //Adiciona vértice ao grafo, o qual possui duas informações: seu id e se é estação de metrô
 void Graph::addVertex(bool isMetroStation, int id) {
@@ -89,3 +94,68 @@ void Graph::printAdjacencyMatrix() {
         std::cout << "\n";
     }
 }
+
+// Função auxiliar
+// Tira o char do id do Vértice
+auto extract_vertex_number(const string& vertex)
+{
+    return stoi(vertex.substr(1));
+}
+
+// Constroi o grafo com uma matriz de adj
+Graph Graph::buildGraph(const string& filename) 
+{
+    ifstream file(filename); 
+    string line;
+    Graph g;
+    // Seed aleatória
+    srand(time(0));
+
+    if (!file.is_open()) 
+    {
+        cerr << "Erro ao abrir o arquivo!" << endl;
+        throw runtime_error("Erro ao abrir o arquivo");
+    }
+
+
+    // Adiciona ao grafo os vértices
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string vertex;
+        ss >> vertex;
+        
+        // Lê o primeiro vértice de cada linha e adiciona
+        int vertex_number = extract_vertex_number(vertex); 
+        g.addVertex(false, vertex_number);
+    }
+    
+    // Para ler de novo o arquivo 
+    file.clear();  
+    file.seekg(0, ios::beg);  
+    
+
+    // Adicionando as arestas
+    while (getline(file, line)) {
+        stringstream ss(line);
+        string vertex;
+        ss >> vertex;
+
+        int vertex_number = extract_vertex_number(vertex);
+
+        // Lê a lista dos adjacentes na linha corrente
+        string adjacent;
+        while (ss >> adjacent) {
+            // Id dos adjacentes
+            int adjacent_number = extract_vertex_number(adjacent);
+
+            // Adiciona aresta entre corrente e o adjacente
+            float distance = rand() % 100 + 1;
+            float trafficRate = rand() % 10 + 1;
+            g.addEdge(vertex_number, adjacent_number, distance, trafficRate);
+        }
+    }
+
+    file.close();
+    return g;  // Retorna o grafo construído
+}
+
