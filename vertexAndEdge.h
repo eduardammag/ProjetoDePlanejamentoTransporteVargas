@@ -20,7 +20,9 @@ public:
 
 // Classe Edge
 class Edge {
-public:
+private:
+    // Atributos privados
+    int m_idEdge;
     Vertex* m_vertex1;
     Vertex* m_vertex2;
     int m_distance;
@@ -29,12 +31,11 @@ public:
     float m_trafficRate;
     float m_excavationCost;
 
-    int generateRandomCode(int numDigits);
-
+public:
     // Construtor
-    Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate);
+    Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge);
 
-    // Métodos de acesso
+    // Getters 
     Vertex* vertex1() const;
     Vertex* vertex2() const;
     int distance() const;
@@ -42,6 +43,7 @@ public:
     int id_street() const;
     float trafficRate() const;
     float excavationCost() const;
+    int idEdge() const;
 };
 
 #endif
