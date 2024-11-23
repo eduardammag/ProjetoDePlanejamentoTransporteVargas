@@ -6,6 +6,7 @@
 #include <list>
 #include <tuple>
 
+using namespace std;
 class Graph {
 public:
     std::vector<Vertex*> vertices;
@@ -19,6 +20,7 @@ public:
     void generateAdjacencyMatrix();
     void printAdjacencyList();
     void printAdjacencyMatrix();
+    Graph buildGraph(const string&);
 };
 
 #endif
