@@ -9,18 +9,27 @@
 using namespace std;
 class Graph {
 public:
-    std::vector<Vertex*> vertices;
-    std::vector<Edge*> edges;
-    std::vector<std::list<std::tuple<int, Edge*>>> adjacencyList;
-    std::vector<std::vector<Edge*>> adjacencyMatrix;
-
     void addVertex(bool isMetroStation, int id);
-    void addEdge(int vertex1Id, int vertex2Id, int distance, float trafficRate);
-    void generateAdjacencyList();
-    void generateAdjacencyMatrix();
+    void addEdge(int vertex1Id, int vertex2Id, int distance, float trafficRate, int idEdge);
     void printAdjacencyList();
     void printAdjacencyMatrix();
-    Graph buildGraph(const string&);
+    
+    // Getters
+    const vector<Vertex*>& vertices();
+    const vector<Edge*>& edges();
+    vector<vector<Edge*>>& adjacencyMatrix();
+    vector<list<tuple<int, Edge*>>>& adjacencyList();
+
+private:
+    // Estruturas internas
+    vector<Vertex*> m_vertices;
+    vector<Edge*> m_edges;
+    vector<list<tuple<int, Edge*>>> m_adjacencyList;
+    vector<vector<Edge*>> m_adjacencyMatrix;
+
+    // Métodos para gerar as representações
+    void generateAdjacencyList();
+    void generateAdjacencyMatrix();
 };
 
 #endif
