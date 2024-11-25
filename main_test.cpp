@@ -5,24 +5,6 @@
 
 using namespace std;
 
-// int main() {
-//     string jsonFilePath = "city_graph.json";
-
-//     vector<Vertex*> vertices;
-//     vector<Edge*> edges;
-
-//     try {
-//         parseJsonFile(jsonFilePath, vertices, edges);
-//     } catch (const exception& e) {
-//         cerr << "Error: " << e.what() << endl;
-//         return 1;
-//     }
-
-//     vector<vector<Edge*>> adjacencyMatrix;
-//     vector<vector<tuple<int, Edge*>>> adjacencyList;
-
-//     generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
-//     generateAdjacencyList(adjacencyMatrix, adjacencyList);
 int main() {
     string jsonFilePath = "city_graph.json";
 
@@ -86,20 +68,12 @@ int main() {
     for (const auto& [key, edgeList] : edgesByCepMap) {
         edgesGrouped.push_back(edgeList);
     }
-    
-    ///////////////////////////////////////////////////////////////////////////////
-    // Agrupar arestas por CEP
-    // vector<vector<Edge*>> edgesGrouped = groupEdgesByCepVector(edges);
 
-    // Processar cada região individualmente
-    for (size_t i = 0; i < edgesGrouped.size(); i++) {
-        const vector<Edge*>& regionEdges = edgesGrouped[i]; // Acessa apenas a lista da região atual
+    // Teste estação
+    cout << "--------------------TESTE ESTAÇÃO------------------------" << endl;
 
-        // Converte a região atual para o formato esperado por findOptimalVertexFast
-        vector<vector<Edge*>> currentRegion = {regionEdges};
-
-        // Encontra o vértice ótimo para a região
-        Vertex* optimalVertex = findOptimalVertexFast(currentRegion, adjacencyList);
+    for (size_t i = 0; i < edgesGrouped.size(); i++) { // Iterar sobre as regiões
+        Vertex* optimalVertex = findOptimalVertexFast(edgesGrouped, adjacencyList);
         if (optimalVertex) {
             cout << "Região " << i << ": Vértice ótimo = " << optimalVertex->id() << endl;
         } else {
@@ -108,8 +82,12 @@ int main() {
     }
 
     // Libera memória
-    for (auto& vertex : vertices) delete vertex;
-    for (auto& edge : edges) delete edge;
+    for (auto& vertex : vertices) {
+        delete vertex;
+    }
+    for (auto& edge : edges) {
+        delete edge;
+    }
 
     return 0;
 }
