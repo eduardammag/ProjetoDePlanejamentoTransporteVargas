@@ -7,13 +7,21 @@ using namespace std;
 Vertex::Vertex(bool isMetroStation, int id)
     : m_isMetroStation(isMetroStation), m_id(id) {}
 
-bool Vertex::isMetroStation() const {
-    return m_isMetroStation;
-}
 
-int Vertex::id() const {
-    return m_id;
-}
+    // Setter para metro
+    void Vertex::setMetroStation(bool isMetroStation) 
+    {
+        m_isMetroStation = isMetroStation;
+    }
+
+    bool Vertex::isMetroStation() const 
+    {
+        return m_isMetroStation;
+    }
+    int Vertex::id() const 
+    {
+        return m_id;
+    }
 
 //classe Edge
 Edge::Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge, int id_zipCode)

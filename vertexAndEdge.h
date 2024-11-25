@@ -4,15 +4,20 @@
 #include <unordered_map>
 
 // Classe Vertex
+
 class Vertex {
-public:
-    bool m_isMetroStation;
+private:
+    bool m_isMetroStation; 
     int m_id;
 
+public:
     // Construtor
     Vertex(bool isMetroStation, int id);
 
-    // Métodos de acesso
+    // Setter para m_isMetroStation
+    void setMetroStation(bool isMetroStation);
+
+    // Getters
     bool isMetroStation() const;
     int id() const;
 };
