@@ -1,8 +1,7 @@
 #ifndef VERTEXANDEDGE_H
 #define VERTEXANDEDGE_H
 
-#include <random>
-#include <cmath>
+#include <unordered_map>
 
 // Classe Vertex
 class Vertex {
@@ -33,17 +32,17 @@ private:
 
 public:
     // Construtor
-    Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge);
+    Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge, int id_zipCode);
 
     // Getters 
     Vertex* vertex1() const;
     Vertex* vertex2() const;
     int distance() const;
-    int id_zipCode() const;
     int id_street() const;
     float trafficRate() const;
     float excavationCost() const;
     int idEdge() const;
+    int id_zipCode();
 };
 
 #endif
