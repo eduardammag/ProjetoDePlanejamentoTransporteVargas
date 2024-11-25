@@ -1,28 +1,9 @@
 #include <iostream>
-#include "buildGraph.h"
-#include "findStation.h"
 #include "vertexAndEdge.h"
+#include "buildGraph.h"
 
 using namespace std;
 
-// int main() {
-//     string jsonFilePath = "city_graph.json";
-
-//     vector<Vertex*> vertices;
-//     vector<Edge*> edges;
-
-//     try {
-//         parseJsonFile(jsonFilePath, vertices, edges);
-//     } catch (const exception& e) {
-//         cerr << "Error: " << e.what() << endl;
-//         return 1;
-//     }
-
-//     vector<vector<Edge*>> adjacencyMatrix;
-//     vector<vector<tuple<int, Edge*>>> adjacencyList;
-
-//     generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
-//     generateAdjacencyList(adjacencyMatrix, adjacencyList);
 int main() {
     string jsonFilePath = "city_graph.json";
 
@@ -70,46 +51,29 @@ int main() {
         }
         cout << endl;
     }
-
+    
     unordered_map<int, vector<Edge*>> edgesByCepMap;
 
     // Agrupa arestas
     for (const auto& edge : edges) {
-        edgesByCepMap[edge->id_zipCode()].push_back(edge);
+    edgesByCepMap[edge->id_zipCode()].push_back(edge);
     }
 
     // Imprime agrupamento
     printEdgesGroupedByCepVector(edgesByCepMap);
-
-    // Converte unordered_map para vector<vector<Edge*>>
-    vector<vector<Edge*>> edgesGrouped;
-    for (const auto& [key, edgeList] : edgesByCepMap) {
-        edgesGrouped.push_back(edgeList);
-    }
     
-    ///////////////////////////////////////////////////////////////////////////////
-    // Agrupar arestas por CEP
-    // vector<vector<Edge*>> edgesGrouped = groupEdgesByCepVector(edges);
+    // criando um grafo direcionado a partir do grafo gerado
+    const vector<vector<tuple<int, Edge*>>>& directedAdj = convertToDirected(adjacencyList);
+    printDirectedAdjacencyList(directedAdj);
 
-    // Processar cada região individualmente
-    for (size_t i = 0; i < edgesGrouped.size(); i++) {
-        const vector<Edge*>& regionEdges = edgesGrouped[i]; // Acessa apenas a lista da região atual
-
-        // Converte a região atual para o formato esperado por findOptimalVertexFast
-        vector<vector<Edge*>> currentRegion = {regionEdges};
-
-        // Encontra o vértice ótimo para a região
-        Vertex* optimalVertex = findOptimalVertexFast(currentRegion, adjacencyList);
-        if (optimalVertex) {
-            cout << "Região " << i << ": Vértice ótimo = " << optimalVertex->id() << endl;
-        } else {
-            cout << "Região " << i << ": Não foi possível determinar o vértice ótimo.\n";
-        }
+    //Libera memória
+    for (auto& vertex : vertices) 
+    {
+        delete vertex;
     }
-
-    // Libera memória
-    for (auto& vertex : vertices) delete vertex;
-    for (auto& edge : edges) delete edge;
+    for (auto& edge : edges) {
+        delete edge;
+    }
 
     return 0;
 }

@@ -2,7 +2,8 @@
 #include "vertexAndEdge.h"
 #include <fstream>
 #include <iostream>
-#include <unordered_map>
+#include <unordered_set>
+#include <queue>
 
 using namespace std;
 
@@ -149,4 +150,143 @@ void printEdgesGroupedByCepVector(const unordered_map<int, vector<Edge*>>& cepTo
         }
         cout << endl;
     }
+}
+
+// Acessar o vértice na outra ponta
+Vertex* otherVertex(Edge* edge, int currentId) 
+{
+    return (edge->vertex1()->id() == currentId) ? edge->vertex2(): edge->vertex1();
+}
+
+// Percorre por bfs adicionando direção ao grafo
+void bfs(Vertex* start,
+             const vector<vector<tuple<int, Edge*>>>& adj,
+             vector<vector<tuple<int, Edge*>>>& directedAdj,
+             vector<int>& degreeOut,
+             vector<int>& degreeIn) 
+    {
+        // Armazenar acessos a vertex e edges
+        unordered_set<int> visited;
+        unordered_set<int> processedEdges;
+        
+        // Fila para a BFS
+        queue<Vertex*> q;
+        q.push(start);
+        visited.insert(start->id());
+        
+        while (!q.empty()) 
+        {
+            // Primeiro vertex na fila
+            Vertex* current = q.front();
+            q.pop();
+            
+            // acessa os adjacentes do vértice atual 
+            for (const auto& [vertexId, edge] : adj[current->id()]) 
+            {
+                // se a aresta já foi visitada
+                if (processedEdges.count(edge->idEdge())) continue;
+
+                processedEdges.insert(edge->idEdge());
+                Vertex* nextVertex = otherVertex(edge, current->id());
+
+                // se grau entrada 0, adiciona uma aresta para dentro
+                if (degreeIn[nextVertex->id()] < 1) 
+                {
+                    directedAdj[nextVertex->id()].emplace_back(nextVertex->id(), edge);
+                    // atualiza os graus
+                    degreeOut[current->id()]++;
+                    degreeIn[nextVertex->id()]++;
+                    
+                    // Rua de mão dupla, aleatóriamente escolhida
+                    if (rand() % 10 < 2) 
+                    {   
+                        // Criando a nova aresta com sentido oposto
+                        int newId =  edge->idEdge() + 1000;
+                        Edge* newEdge = new Edge(edge->distance(), edge->vertex1(), edge->vertex2(), edge->trafficRate(), newId, edge->id_zipCode());
+                        directedAdj[current->id()].emplace_back(current->id(), newEdge);
+                        degreeOut[current->id()]++;
+                        degreeIn[nextVertex->id()]++;
+                    }
+                } 
+                // se grau de saída 0, adiciona uma aresta para fora
+                else if (degreeOut[current->id()] < 1) 
+                {
+                    directedAdj[current->id()].emplace_back(current->id(), edge);
+                    degreeOut[current->id()]++;
+                    degreeIn[nextVertex->id()]++;
+                    
+                    // Rua de mão dupla, aleatóriamente escolhida
+                    if (rand() % 10 < 2) 
+                    { // Cria nova aresta com sentido oposto
+                        Edge* newEdge = new Edge(edge->distance(), edge->vertex1(), edge->vertex2(), edge->trafficRate(), edge->idEdge()+1000, edge->id_zipCode());
+                        directedAdj[nextVertex->id()].emplace_back(nextVertex->id(), newEdge);
+                        degreeOut[nextVertex->id()]++;
+                        degreeIn[current->id()]++;
+                    }
+                    
+                } 
+                else 
+                {
+                    // se já tiver grau de entrada e saída a direção é aleatória
+                    if (rand() % 2 == 0) 
+                    {
+                        // Para fora
+                        directedAdj[current->id()].emplace_back(current->id(), edge); 
+                        degreeOut[current->id()]++;
+                        degreeIn[nextVertex->id()]++;
+                    } 
+                    else 
+                    {
+                        // Para dentro
+                        directedAdj[nextVertex->id()].emplace_back(nextVertex->id(), edge); 
+                        degreeOut[nextVertex->id()]++;
+                        degreeIn[current->id()]++;
+                    }
+                }
+
+
+                // Se o próximo vértice ainda não foi visitado, adiciona na fila
+                if (!visited.count(nextVertex->id())) 
+                {
+                    visited.insert(nextVertex->id());
+                    q.push(nextVertex);
+                }
+            }
+        }
+    }
+
+
+vector<vector<tuple<int, Edge*>>> convertToDirected(const vector<vector<tuple<int, Edge*>>>& adj) 
+{   
+
+    int n = adj.size();
+    // Inicializa estruturas auxiliares
+    vector<vector<tuple<int, Edge*>>> directedAdj(n);
+    unordered_set<int> visited;
+    unordered_set<int> processedEdges;
+
+    // Inicializa os vetores de graus
+    vector<int> degreeOut(n, 0);
+    vector<int> degreeIn(n, 0);
+
+    // Escolhe um vértice inicial 
+    Vertex* start = std::get<1>(adj[0][0])->vertex1();
+   // Realiza a BFS
+    bfs(start, adj, directedAdj, degreeOut, degreeIn);
+
+    return directedAdj;
+}
+
+void printDirectedAdjacencyList(const vector<vector<tuple<int, Edge*>>>& directedAdj) 
+{
+        cout << "Lista de Adjacência do Grafo Direcionado:" << endl;
+        for (int i = 0; i < directedAdj.size(); ++i) 
+        {
+            cout << "Vértice " << i << ": ";
+            for (const auto& [vertexId, edge] : directedAdj[i]) 
+            {
+                cout << " Edge ID: " << edge->idEdge() << ", Conecta: " << otherVertex(edge,vertexId)->id();
+            }
+            cout << endl;
+        }
 }

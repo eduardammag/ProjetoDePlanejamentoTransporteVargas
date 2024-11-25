@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <string>
-#include <tuple>
 #include "vertexAndEdge.h"
 
 using namespace std;
@@ -22,5 +21,17 @@ vector<vector<Edge*>> groupEdgesByCepVector(const vector<Edge*>& edges);
 
 //Função auxiliar para imprimir as listas de arestas para cada cep
 void printEdgesGroupedByCepVector(const unordered_map<int, vector<Edge*>>& cepToEdgesMap);
+
+Vertex* otherVertex(Edge* edge, Vertex* current);
+         
+void bfs(Vertex* start,
+             const vector<vector<tuple<int, Edge*>>>& adj,
+             vector<vector<tuple<int, Edge*>>>& directedAdj,
+             vector<int>& degreeOut,
+             vector<int>& degreeIn);
+
+vector<vector<tuple<int, Edge*>>> convertToDirected(const vector<vector<tuple<int, Edge*>>>& adj);
+void printDirectedAdjacencyList(const vector<vector<tuple<int, Edge*>>>& directedAdj);
+
 
 #endif
