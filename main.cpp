@@ -2,55 +2,67 @@
 #include "vertexAndEdge.h"
 #include "buildGraph.h"
 
-int main() {
-    std::string jsonFilePath = "city_graph.json"; // Path to your JSON file
+using namespace std;
 
-    std::vector<Vertex*> vertices;
-    std::vector<Edge*> edges;
+int main() {
+    string jsonFilePath = "city_graph.json";
+
+    vector<Vertex*> vertices;
+    vector<Edge*> edges;
 
     try {
         parseJsonFile(jsonFilePath, vertices, edges);
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+    } catch (const exception& e) {
+        cerr << "Error: " << e.what() << endl;
         return 1;
     }
 
-    // Matrices and lists
-    std::vector<std::vector<Edge*>> adjacencyMatrix;
-    std::vector<std::vector<std::tuple<int, Edge*>>> adjacencyList;
+    //Matrizes e listas
+    vector<vector<Edge*>> adjacencyMatrix;
+    vector<vector<tuple<int, Edge*>>> adjacencyList;
 
-    // Generate adjacency matrix
+    //Gera a matriz de adjacência
     generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
 
-    // Generate adjacency list
+    //Gera a lista de adjacência
     generateAdjacencyList(adjacencyMatrix, adjacencyList);
 
-    // Display the adjacency matrix
-    std::cout << "\nAdjacency Matrix (with edge IDs):" << std::endl;
+    //Imprime a matriz de adjacência
+    cout << "\nAdjacency Matrix (with edge IDs):" << endl;
     for (const auto& row : adjacencyMatrix) {
         for (const auto& value : row) {
             if (value != nullptr) {
-                std::cout << "Edge ID: " << value->idEdge() << " ";
+                cout << "Edge ID: " << value << " ";
             } else {
-                std::cout << "nullptr ";
+                cout << "nullptr ";
             }
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 
-    // Display the adjacency list
-    std::cout << "\nAdjacency List (with tuples (destination vertex, edge ID)):" << std::endl;
+    //Imprime a lista de adjacência
+    cout << "\nAdjacency List (with tuples (destination vertex, edge ID)):" << endl;
     for (size_t i = 0; i < adjacencyList.size(); ++i) {
-        std::cout << "Vertex " << i << ": ";
+        cout << "Vertex " << i << ": ";
         for (const auto& adj : adjacencyList[i]) {
-            int destination = std::get<0>(adj);
-            Edge* edge = std::get<1>(adj);
-            std::cout << "(" << destination << ", Edge ID: " << edge->idEdge() << ") ";
+            int destination = get<0>(adj);
+            Edge* edge = get<1>(adj);
+            cout << "(" << destination << ", Edge pointer: " << edge << ") ";
         }
-        std::cout << std::endl;
+        cout << endl;
+    }
+    
+    unordered_map<int, vector<Edge*>> edgesByCepMap;
+
+    //Agrupa arestas
+    for (const auto& edge : edges) {
+    edgesByCepMap[edge->id_zipCode()].push_back(edge);
     }
 
-    // Clean up memory
+    //Imprime agrupamento
+    printEdgesGroupedByCepVector(edgesByCepMap);
+
+    //Libera memória
     for (auto& vertex : vertices) {
         delete vertex;
     }
