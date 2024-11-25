@@ -1,86 +1,62 @@
 #include <iostream>
 #include "vertexAndEdge.h"
-#include "graph.h"
-#include <random>
-#include <cmath>
-#include <ctime>
+#include "buildGraph.h"
 
-using namespace std;
+int main() {
+    std::string jsonFilePath = "city_graph.json"; // Path to your JSON file
 
-int main() 
-{
-    srand(time(0));  //Inicializa a semente aleatória para gerar valores diferentes a cada execução
+    std::vector<Vertex*> vertices;
+    std::vector<Edge*> edges;
 
-    cout << "TESTE DAS CLASSES VERTEX E EDGE" << endl;
-    cout << "-----------------" << endl;
-
-    //Criar vértices
-    Vertex v1(true, 1);  
-    Vertex v2(false, 2);  
-
-    Edge e(100, &v1, &v2, 1.5, 10);  
-
-    cout << "Vértice 1 ID: " << e.vertex1()->id() << " | É estação de metrô? " 
-         << (e.vertex1()->isMetroStation() ? "Sim" : "Não") << endl;
-
-    cout << "Vértice 2 ID: " << e.vertex2()->id() << " | É estação de metrô? " 
-         << (e.vertex2()->isMetroStation() ? "Sim" : "Não") << endl;
-
-    cout << "Distância da aresta: " << e.distance() << endl;
-    cout << "CEP (4 dígitos): " << e.id_zipCode() << endl;
-    cout << "Rua (8 dígitos): " << e.id_street() << endl;
-    cout << "Taxa de Tráfego: " << e.trafficRate() << endl;
-    cout << "Custo de Escavação: " << e.excavationCost() << endl;
-    cout << "-----------------" << endl;
-
-    //Criar grafo
-    Graph g;
-    const int numVertices = 100;  //100 vértices
-    const int maxEdges = 5;  //Número máximo de arestas por vértice
-
-    //Adiciona 100 vértices
-    for (int i = 0; i < numVertices; ++i) 
-    {
-        g.addVertex(i % 2 == 0, i);  //Alternando estação de metrô e não
+    try {
+        parseJsonFile(jsonFilePath, vertices, edges);
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
     }
 
-    //Adiciona arestas aleatórias entre vértices, com restrição de uma aresta por par de vértices
-    for (int i = 0; i < numVertices; ++i) 
-    {
-        //Cada vértice pode ter até 'maxEdges' arestas
-        int edgesToAdd = rand() % maxEdges;  //Número aleatório de arestas para o vértice 'i'
+    // Matrices and lists
+    std::vector<std::vector<Edge*>> adjacencyMatrix;
+    std::vector<std::vector<std::tuple<int, Edge*>>> adjacencyList;
 
-        int counter = 0;
-        for (int j = 0; j < edgesToAdd; ++j) 
-        {
-            int target = rand() % numVertices;  //Escolhe um vértice aleatório para se conectar
-            if (target != i) 
-            {  //Impede arestas de laço (vértice se conectando a ele mesmo)
-                //Verifica se já existe uma aresta entre os dois vértices
-                bool edgeExists = false;
-                for (auto& e : g.edges()) 
-                {  //Usando 'edges' diretamente
-                    if ((e->vertex1()->id() == i && e->vertex2()->id() == target) ||
-                        (e->vertex1()->id() == target && e->vertex2()->id() == i)) 
-                        {
-                        edgeExists = true;
-                        break;
-                        }
-                }
-                if (!edgeExists) 
-                {  //Se não existe, adicione a aresta
-                    float distance = rand() % 100 + 1;  //Distância aleatória entre 1 e 100
-                    float trafficRate = rand() % 10 + 1;  //Taxa de tráfego aleatória entre 1 e 10
-                    g.addEdge(i, target, distance, trafficRate, counter++);
-                 }
+    // Generate adjacency matrix
+    generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
+
+    // Generate adjacency list
+    generateAdjacencyList(adjacencyMatrix, adjacencyList);
+
+    // Display the adjacency matrix
+    std::cout << "\nAdjacency Matrix (with edge IDs):" << std::endl;
+    for (const auto& row : adjacencyMatrix) {
+        for (const auto& value : row) {
+            if (value != nullptr) {
+                std::cout << "Edge ID: " << value->idEdge() << " ";
+            } else {
+                std::cout << "nullptr ";
             }
         }
+        std::cout << std::endl;
     }
 
-    //Imprime as representações
-    g.printAdjacencyList();
-    g.printAdjacencyMatrix();
-    cout << "-----------------" << endl;
+    // Display the adjacency list
+    std::cout << "\nAdjacency List (with tuples (destination vertex, edge ID)):" << std::endl;
+    for (size_t i = 0; i < adjacencyList.size(); ++i) {
+        std::cout << "Vertex " << i << ": ";
+        for (const auto& adj : adjacencyList[i]) {
+            int destination = std::get<0>(adj);
+            Edge* edge = std::get<1>(adj);
+            std::cout << "(" << destination << ", Edge ID: " << edge->idEdge() << ") ";
+        }
+        std::cout << std::endl;
+    }
+
+    // Clean up memory
+    for (auto& vertex : vertices) {
+        delete vertex;
+    }
+    for (auto& edge : edges) {
+        delete edge;
+    }
 
     return 0;
 }
