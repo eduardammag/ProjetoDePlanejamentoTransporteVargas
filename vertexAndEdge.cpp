@@ -1,36 +1,29 @@
 #include "vertexAndEdge.h"
-#include <random> // Para o gerador de números aleatórios
-#include <cmath>  // Para a função pow
+#include <random>
 
 using namespace std; 
 
-// Implementação da classe Vertex
-
-// Construtor da classe Vertex
-// Inicializa os atributos com os valores passados
+//classe Vertex
 Vertex::Vertex(bool isMetroStation, int id)
     : m_isMetroStation(isMetroStation), m_id(id) {}
 
-// Método que retorna se o vértice é uma estação de metrô
 bool Vertex::isMetroStation() const {
     return m_isMetroStation;
 }
 
-// Método que retorna o ID do vértice
 int Vertex::id() const {
     return m_id;
 }
 
-// Implementação da classe Edge
-
-// Construtor da classe Edge
-// Inicializa os atributos e calcula o custo de escavação e códigos aleatórios
-Edge::Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge)
+//classe Edge
+Edge::Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge, int id_zipCode)
     : m_distance(distance),
       m_vertex1(vertex1),
       m_vertex2(vertex2),
       m_trafficRate(trafficRate),
-      m_idEdge(idEdge) {
+      m_zipCode(id_zipCode),
+      m_idEdge(idEdge) 
+{
     m_excavationCost = distance / 2.0f; // Define o custo de escavação como metade da distância
 }
 
@@ -50,7 +43,7 @@ int Edge::distance() const
     return m_distance;
 }
 
-int Edge::id_zipCode() const
+int Edge::id_zipCode()
 {
     return m_zipCode;
 }
