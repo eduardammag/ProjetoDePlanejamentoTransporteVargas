@@ -73,7 +73,14 @@ Vertex* findOptimalVertexFast(const vector<vector<Edge*>>& regionVertices, const
         }
     }
 
+    // Atualiza o atributo do vértice ótimo, se encontrado
+    if (optimalVertex) {
+        optimalVertex->setMetroStation(true); // Marca o vértice ótimo como estação de metrô
+    }
+
     return optimalVertex;
+
+
 }
 
 
