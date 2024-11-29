@@ -26,11 +26,11 @@ int main() {
 
     // Gera a matriz de adjacência (representação do grafo)
     generateAdjacencyMatrix(vertices, allEdges, adjacencyMatrix);
-    
+
     // Gera a lista de adjacência (converte as arestas para o formato necessário)
-    adjacencyList.resize(vertices.size());  // Tamanho da lista de adjacência igual ao número de vértices
+    adjacencyList.resize(vertices.size());
     for (const auto& edge : allEdges) {
-        int u = edge->vertex1()->id();  // Supondo que a aresta tenha vértices 1 e 2
+        int u = edge->vertex1()->id();
         int v = edge->vertex2()->id();
         adjacencyList[u].push_back({v, edge});
         adjacencyList[v].push_back({u, edge});
@@ -53,11 +53,11 @@ int main() {
 
     // Processa cada região individualmente, buscando o vértice ótimo para cada uma
     for (size_t i = 0; i < edgesGrouped.size(); i++) {
-        const vector<Edge*>& regionEdges = edgesGrouped[i];  // Acessa as arestas da região atual
-    
+        const vector<Edge*>& regionEdges = edgesGrouped[i];
+
         // Converte a região para o formato esperado pela função que encontra o vértice ótimo
         vector<vector<Edge*>> currentRegion = {regionEdges};
-    
+
         // Encontra o vértice ótimo da região
         Vertex* optimalVertex = findOptimalVertexFast(currentRegion, adjacencyList);
         if (optimalVertex) {
@@ -70,44 +70,49 @@ int main() {
     }
 
     // Adicionando lógica para a árvore de Steiner
-    vector<Vertex*> terminals;  // Agora é um vetor de ponteiros para Vertex
+    vector<Vertex*> terminals;
     for (auto& vertex : vertices) {
-        if (vertex->isMetroStation()) { // Adiciona apenas vértices que são estações de metrô
+        if (vertex->isMetroStation()) {
             terminals.push_back(vertex);
         }
     }
 
-    // Chama a função para calcular a árvore de Steiner
     vector<Edge*> steinerEdges = steinerTree(vertices, adjacencyList, terminals);
 
     // Imprime as arestas da árvore de Steiner
     cout << "\nÁrvore de Steiner:" << endl;
     for (const auto& edge : steinerEdges) {
-        cout << "Aresta de " << edge->vertex1()->id() << " a " << edge->vertex2()->id() 
+        cout << "Aresta de " << edge->vertex1()->id() << " a " << edge->vertex2()->id()
              << " com distância " << edge->distance() << endl;
     }
 
-    // Preencher o vetor "stations" com as estações de metrô
+    // Gera a Árvore Geradora Mínima (MST) usando Kruskal
+    vector<Edge*> mstEdges = kruskal(vertices.size(), allEdges);
+
+    // Imprime as arestas da MST
+    cout << "\nÁrvore Geradora Mínima (MST):" << endl;
+    for (const auto& edge : mstEdges) {
+        cout << "Aresta de " << edge->vertex1()->id() << " a " << edge->vertex2()->id()
+             << " com distância " << edge->distance() << endl;
+    }
+
+    // Calcula a distância entre todas as estações de metrô
     vector<Vertex*> stations;
     for (auto& vertex : vertices) {
-        if (vertex->isMetroStation()) {  // Adiciona apenas as estações de metrô
+        if (vertex->isMetroStation()) {
             stations.push_back(vertex);
         }
     }
 
-    // Calcular a distância entre todas as estações de metrô
     for (size_t i = 0; i < stations.size(); i++) {
         for (size_t j = i + 1; j < stations.size(); j++) {
-            // Calcula a distância entre a estação[i] e a estação[j]
             vector<int> dist, parent;
             cptDijkstraFast(stations[i], parent, dist, adjacencyList);
-            int distance = dist[stations[j]->id()]; // Distância entre a estação[i] e a estação[j]
-    
-            // Reconstrói o caminho entre as estações
+            int distance = dist[stations[j]->id()];
+
             vector<int> path = reconstructPath(stations[i]->id(), stations[j]->id(), parent);
-    
-            // Imprime a distância e o caminho
-            cout << "Distância entre a estação " << stations[i]->id() << " e " << stations[j]->id() 
+
+            cout << "Distância entre a estação " << stations[i]->id() << " e " << stations[j]->id()
                  << ": " << distance << " unidades" << endl;
             cout << "Caminho: ";
             for (int v : path) {
@@ -117,8 +122,7 @@ int main() {
         }
     }
 
-
-    // Libera memória alocada para vértices e arestas
+    // Libera memória
     for (auto& vertex : vertices) delete vertex;
     for (auto& edge : allEdges) delete edge;
 
