@@ -5,11 +5,10 @@
 
 // Classe Vertex: Representa um vértice (ou nó) no grafo.
 class Vertex {
-private:
+public:
     bool m_isMetroStation; // Indica se o vértice é uma estação de metrô.
     int m_id; // Identificador único do vértice.
 
-public:
     // Construtor: Inicializa um vértice com a informação se é uma estação de metrô e seu ID.
     Vertex(bool isMetroStation, int id);
 
@@ -31,7 +30,7 @@ private:
     Vertex* m_vertex2; // Ponteiro para o segundo vértice da aresta.
     int m_distance; // Distância entre os dois vértices.
     int m_zipCode; // Código postal associado à aresta.
-    int m_street; // ID da rua associada à aresta.
+    int m_street; // ID da rua associada à aresta (se necessário, adicione um getter/setter).
     float m_trafficRate; // Taxa de tráfego na aresta.
     float m_excavationCost; // Custo de escavação para construir ou modificar a aresta.
 
@@ -56,6 +55,9 @@ public:
 
     // Getter: Retorna o custo de escavação.
     float excavationCost() const;
+
+    // Setter: Permite definir o custo de escavação da aresta.
+    void setExcavationCost(float cost);
 
     // Getter: Retorna o identificador único da aresta.
     int idEdge() const;
