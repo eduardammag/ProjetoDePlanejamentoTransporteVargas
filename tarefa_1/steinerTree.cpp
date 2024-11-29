@@ -2,30 +2,11 @@
 #include <climits>
 #include <queue>
 #include <algorithm>
-#include <algorithm>
-// Implementação da classe UnionFind
-UnionFind::UnionFind(int n) : parent(n), rank(n, 0) {
-    for (int i = 0; i < n; ++i) parent[i] = i;
-}
+#include <vector>
+#include <tuple>
 
-int UnionFind::find(int x) {
-    if (parent[x] != x)
-        parent[x] = find(parent[x]); // Caminho de compressão
-    return parent[x];
-}
+using namespace std;
 
-void UnionFind::unite(int x, int y) {
-    int rootX = find(x);
-    int rootY = find(y);
-    if (rootX != rootY) {
-        if (rank[rootX] < rank[rootY]) parent[rootX] = rootY;
-        else if (rank[rootX] > rank[rootY]) parent[rootY] = rootX;
-        else {
-            parent[rootY] = rootX;
-            rank[rootX]++;
-        }
-    }
-}
 
 // Função para calcular o menor caminho usando Dijkstra
 vector<int> dijkstra(const vector<vector<tuple<int, Edge*>>>& adjacencyList, int start) {
@@ -60,6 +41,63 @@ vector<int> dijkstra(const vector<vector<tuple<int, Edge*>>>& adjacencyList, int
     return parent;
 }
 
+// Função de Kruskal para construir a MST
+vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges) {
+    vector<Edge*> mstEdges;
+    UnionFind uf(numVertices);
+
+    // Ordena as arestas pelo peso
+    vector<Edge*> sortedEdges = edges;
+    sort(sortedEdges.begin(), sortedEdges.end(), [](Edge* a, Edge* b) {
+        return a->distance() < b->distance(); // Supondo que 'distance()' retorne o peso
+    });
+
+    // Adiciona arestas ao MST enquanto evita ciclos
+    for (Edge* edge : sortedEdges) {
+        // Alterar para usar o método adequado de acesso aos vértices
+    int u = edge->vertex1()->id();  // Método correto para acessar o vértice de origem
+    int v = edge->vertex2()->id();  // Método correto para acessar o vértice de destino
+        if (uf.find(u) != uf.find(v)) {
+            mstEdges.push_back(edge);
+            uf.unite(u, v);
+        }
+    }
+
+    return mstEdges;
+}
+
+// Função principal para calcular a Árvore de Steiner
+vector<Edge*> steinerTree(const vector<Vertex*>& vertices, 
+                          const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
+                          const vector<Vertex*>& terminals) {
+    vector<Edge*> allEdges;
+
+    // Calcula os caminhos mais curtos entre terminais
+    vector<vector<int>> allShortestPaths(terminals.size());
+    for (size_t i = 0; i < terminals.size(); ++i) {
+        allShortestPaths[i] = dijkstra(adjacencyList, terminals[i]->id());
+    }
+
+    // Constrói arestas do subgrafo
+    for (size_t i = 0; i < terminals.size(); ++i) {
+        for (size_t j = i + 1; j < terminals.size(); ++j) {
+            vector<int> path = reconstructPath(allShortestPaths[i], terminals[j]->id());
+            for (size_t k = 1; k < path.size(); ++k) {
+                int u = path[k - 1];
+                int v = path[k];
+                for (const auto& adj : adjacencyList[u]) {
+                    if (get<0>(adj) == v) {
+                        allEdges.push_back(get<1>(adj));
+                    }
+                }
+            }
+        }
+    }
+
+    // Aplica Kruskal para obter a MST do subgrafo
+    return kruskal(vertices.size(), allEdges);
+}
+
 // Função para reconstruir o caminho mais curto
 vector<int> reconstructPath(const vector<int>& parent, int destination) {
     vector<int> path;
@@ -68,54 +106,6 @@ vector<int> reconstructPath(const vector<int>& parent, int destination) {
     }
     reverse(path.begin(), path.end());
     return path;
-}
-
-// Função principal para calcular a Árvore de Steiner
-vector<Edge*> steinerTree(const vector<Vertex*>& vertices, const vector<vector<tuple<int, Edge*>>>& adjacencyList, const vector<Vertex*>& terminals) {
-    vector<Edge*> steinerEdges;
-
-    // Passo 1: Calcular o caminho mais curto entre todos os terminais usando Dijkstra
-    vector<vector<int>> allShortestPaths(terminals.size());
-    for (size_t i = 0; i < terminals.size(); ++i) {
-        int terminalId = terminals[i]->id();  // Supondo que cada terminal tenha um ID
-        allShortestPaths[i] = dijkstra(adjacencyList, terminalId);
-    }
-
-    // Passo 2: Construir uma nova rede com os terminais e suas conexões mais curtas
-    vector<Edge*> mstEdges;
-
-    // Inicializando a estrutura UnionFind para evitar ciclos
-    UnionFind uf(vertices.size());
-
-    // Simulação do algoritmo de Kruskal para conectar os terminais
-    for (size_t i = 0; i < terminals.size(); ++i) {
-        int terminalId = terminals[i]->id();
-        for (size_t j = i + 1; j < terminals.size(); ++j) {
-            int otherTerminalId = terminals[j]->id();
-            vector<int> path = reconstructPath(allShortestPaths[i], otherTerminalId);
-
-            // Conectar os terminais através das arestas do caminho
-            for (size_t k = 1; k < path.size(); ++k) {
-                int u = path[k-1];
-                int v = path[k];
-
-                // Suponha que a aresta entre u e v já exista na lista de adjacência
-                for (const auto& adj : adjacencyList[u]) {
-                    if (get<0>(adj) == v) {
-                        Edge* edge = get<1>(adj);
-                        
-                        // Verifica se os vértices estão em componentes diferentes antes de adicionar a aresta
-                        if (uf.find(u) != uf.find(v)) {
-                            steinerEdges.push_back(edge);
-                            uf.unite(u, v);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return steinerEdges;
 }
 
 // Função para reconstruir o caminho entre dois vértices
