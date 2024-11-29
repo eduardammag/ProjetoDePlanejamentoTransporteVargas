@@ -33,4 +33,7 @@ vector<int> reconstructPath(const vector<int>& parent, int destination);
 std::vector<Edge*> steinerTree(const std::vector<Vertex*>& vertices, 
                                const std::vector<std::vector<std::tuple<int, Edge*>>>& adjacencyList, 
                                const std::vector<Vertex*>& terminals);
+                               
+std::vector<int> reconstructPath(int source, int target, const std::vector<int>& parent);
+                               
 #endif // STEINER_TREE_H
