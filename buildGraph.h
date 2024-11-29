@@ -23,7 +23,7 @@ void printGraph(); // Declaração da função de impressão
 //Função auxiliar para imprimir as listas de arestas para cada cep
 void printEdgesGroupedByCepVector(const unordered_map<int, vector<Edge*>>& cepToEdgesMap);
 
-Vertex* otherVertex(Edge* edge, Vertex* current);
+Vertex* otherVertex(Edge* edge, int currentId);
          
 void bfs(Vertex* start,
              const vector<vector<tuple<int, Edge*>>>& adj,
