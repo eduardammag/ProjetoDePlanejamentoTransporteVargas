@@ -162,22 +162,6 @@ int main() {
                  << " | Distância: " << weight << endl;
         }
     }
-
-    // Adicionando lógica para verificar se a lista de terminais está sendo preenchida corretamente
-    for (auto& vertex : vertices) {
-        if (vertex->isMetroStation()) {
-            terminals.push_back(vertex);
-        }
-    }
-    
-    // Imprime os terminais (vértices ótimos)
-    cout << "\nVértices ótimos (estações de metrô):" << endl;
-    for (const auto& terminal : terminals) {
-        cout << "Vértice ótimo: " << terminal->id() << endl;
-    }
-
-
-
     // Libera memória
     for (auto& vertex : vertices) delete vertex;
     for (auto& edge : allEdges) delete edge;
