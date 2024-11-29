@@ -121,6 +121,38 @@ int main() {
             cout << endl;
         }
     }
+    
+    // Imprime os vértices da Árvore de Steiner
+    cout << "\nÁrvore de Steiner:" << endl;
+    for (const auto& edge : steinerEdges) {
+        // Obtém os vértices conectados pela aresta
+        int u = edge->vertex1()->id();
+        int v = edge->vertex2()->id();
+        
+        // Obtém a distância da aresta (peso)
+        int weight = edge->distance();
+    
+        // Imprime os vértices e a distância
+        cout << "Vértices conectados: " << u << " - " << v 
+             << " | Distância: " << weight << endl;
+    }
+    
+    // Imprime os vértices da Árvore Geradora Mínima (MST)
+    cout << "\nÁrvore Geradora Mínima (MST):" << endl;
+    for (const auto& edge : mstEdges) {
+        // Obtém os vértices conectados pela aresta
+        int u = edge->vertex1()->id();
+        int v = edge->vertex2()->id();
+        
+        // Obtém a distância da aresta (peso)
+        int weight = edge->distance();
+    
+        // Imprime os vértices e a distância
+        cout << "Vértices conectados: " << u << " - " << v 
+             << " | Distância: " << weight << endl;
+    }
+
+
 
     // Libera memória
     for (auto& vertex : vertices) delete vertex;
