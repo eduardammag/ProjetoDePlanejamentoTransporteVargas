@@ -122,35 +122,47 @@ int main() {
         }
     }
     
-    // Imprime os vértices da Árvore de Steiner
-    cout << "\nÁrvore de Steiner:" << endl;
+    // Imprime os vértices da Árvore de Steiner, mas apenas os vértices ótimos
+    cout << "\nÁrvore de Steiner (somente vértices ótimos):" << endl;
     for (const auto& edge : steinerEdges) {
         // Obtém os vértices conectados pela aresta
         int u = edge->vertex1()->id();
         int v = edge->vertex2()->id();
-        
-        // Obtém a distância da aresta (peso)
-        int weight = edge->distance();
     
-        // Imprime os vértices e a distância
-        cout << "Vértices conectados: " << u << " - " << v 
-             << " | Distância: " << weight << endl;
+        // Verifica se ambos os vértices são terminais (ou seja, vértices ótimos)
+        if (find(terminals.begin(), terminals.end(), edge->vertex1()) != terminals.end() &&
+            find(terminals.begin(), terminals.end(), edge->vertex2()) != terminals.end()) {
+            
+            // Obtém a distância da aresta (peso)
+            int weight = edge->distance();
+            
+            // Imprime os vértices e a distância
+            cout << "Vértices conectados: " << u << " - " << v 
+                 << " | Distância: " << weight << endl;
+        }
     }
+
     
-    // Imprime os vértices da Árvore Geradora Mínima (MST)
-    cout << "\nÁrvore Geradora Mínima (MST):" << endl;
+    // Imprime os vértices da Árvore Geradora Mínima (MST), mas somente os vértices ótimos
+    cout << "\nÁrvore Geradora Mínima (MST) (somente vértices ótimos):" << endl;
     for (const auto& edge : mstEdges) {
         // Obtém os vértices conectados pela aresta
         int u = edge->vertex1()->id();
         int v = edge->vertex2()->id();
-        
-        // Obtém a distância da aresta (peso)
-        int weight = edge->distance();
     
-        // Imprime os vértices e a distância
-        cout << "Vértices conectados: " << u << " - " << v 
-             << " | Distância: " << weight << endl;
+        // Verifica se ambos os vértices são terminais (vértices ótimos)
+        if (find(terminals.begin(), terminals.end(), edge->vertex1()) != terminals.end() &&
+            find(terminals.begin(), terminals.end(), edge->vertex2()) != terminals.end()) {
+            
+            // Obtém a distância da aresta (peso)
+            int weight = edge->distance();
+    
+            // Imprime os vértices e a distância
+            cout << "Vértices conectados: " << u << " - " << v 
+                 << " | Distância: " << weight << endl;
+        }
     }
+
 
 
 
