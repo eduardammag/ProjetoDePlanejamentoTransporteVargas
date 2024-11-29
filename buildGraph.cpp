@@ -302,8 +302,7 @@ void printDirectedAdjacencyList(const vector<vector<tuple<int, Edge*>>>& directe
             cout << "Vértice " << i << ": ";
             for (const auto& [vertexId, edge] : directedAdj[i]) 
             {
-                cout << " Edge ID: " << edge->idEdge() << ", Conecta: " << otherVertex(edge,vertexId)->id();
-            }
+                cout << " Edge ID: " << edge->idEdge() << ", Conecta: " << edge->vertex1()->id() << " -> " << edge->vertex2()->id();            }
             cout << endl;
         }
 }
