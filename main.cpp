@@ -2,161 +2,62 @@
 #include "buildGraph.h"
 #include "findStation.h"
 #include "vertexAndEdge.h"
-#include "steinerTree.h" 
+#include "steinerTree.h"
 using namespace std;
 
-// int main() {
-//     string jsonFilePath = "city_graph.json";
-
-//     vector<Vertex*> vertices;
-//     vector<Edge*> edges;
-
-//     try {
-//         parseJsonFile(jsonFilePath, vertices, edges);
-//     } catch (const exception& e) {
-//         cerr << "Error: " << e.what() << endl;
-//         return 1;
-//     }
-
-//     vector<vector<Edge*>> adjacencyMatrix;
-//     vector<vector<tuple<int, Edge*>>> adjacencyList;
-
-//     generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
-//     generateAdjacencyList(adjacencyMatrix, adjacencyList);
 int main() {
-    string jsonFilePath = "city_graph.json";
+    string jsonFilePath = "city_graph.json";  // Caminho para o arquivo JSON com os dados da cidade
 
-    vector<Vertex*> vertices;
-    vector<Edge*> edges;
+    vector<Vertex*> vertices;  // Vetor de vértices (estações)
+    vector<Edge*> allEdges;    // Vetor de todas as arestas (rotas entre as estações)
 
     try {
-        parseJsonFile(jsonFilePath, vertices, edges);
+        // Parseia o arquivo JSON e preenche os vetores de vértices e arestas
+        parseJsonFile(jsonFilePath, vertices, allEdges);
     } catch (const exception& e) {
         cerr << "Error: " << e.what() << endl;
         return 1;
     }
 
-    // Matrizes e listas
+    // Matrizes e listas para representação do grafo
     vector<vector<Edge*>> adjacencyMatrix;
     vector<vector<tuple<int, Edge*>>> adjacencyList;
 
-    // Gera a matriz de adjacência
-    generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
+    // Gera a matriz de adjacência (representação do grafo)
+    generateAdjacencyMatrix(vertices, allEdges, adjacencyMatrix);
+    
+    // Gera a lista de adjacência (converte as arestas para o formato necessário)
+    adjacencyList.resize(vertices.size());  // Tamanho da lista de adjacência igual ao número de vértices
+    for (const auto& edge : allEdges) {
+        int u = edge->vertex1()->id();  // Supondo que a aresta tenha vértices 1 e 2
+        int v = edge->vertex2()->id();
+        adjacencyList[u].push_back({v, edge});
+        adjacencyList[v].push_back({u, edge});
+    }
 
-    // Gera a lista de adjacência
-    generateAdjacencyList(adjacencyMatrix, adjacencyList);
-
-    // // Imprime a matriz de adjacência
-    // cout << "\nAdjacency Matrix (with edge IDs):" << endl;
-    // for (const auto& row : adjacencyMatrix) {
-    //     for (const auto& value : row) {
-    //         if (value != nullptr) {
-    //             cout << "Edge ID: " << value << " ";
-    //         } else {
-    //             cout << "nullptr ";
-    //         }
-    //     }
-    //     cout << endl;
-    // }
-
-    // // Imprime a lista de adjacência
-    // cout << "\nAdjacency List (with tuples (destination vertex, edge ID)):" << endl;
-    // for (size_t i = 0; i < adjacencyList.size(); ++i) {
-    //     cout << "Vertex " << i << ": ";
-    //     for (const auto& adj : adjacencyList[i]) {
-    //         int destination = get<0>(adj);
-    //         Edge* edge = get<1>(adj);
-    //         cout << "(" << destination << ", Edge pointer: " << edge << ") ";
-    //     }
-    //     cout << endl;
-    // }
-
+    // Agrupa as arestas por CEP
     unordered_map<int, vector<Edge*>> edgesByCepMap;
-
-    // Agrupa arestas
-    for (const auto& edge : edges) {
+    for (const auto& edge : allEdges) {
         edgesByCepMap[edge->id_zipCode()].push_back(edge);
     }
 
-    // Imprime agrupamento
+    // Imprime as arestas agrupadas por CEP
     printEdgesGroupedByCepVector(edgesByCepMap);
 
-    // Converte unordered_map para vector<vector<Edge*>>
-    vector<vector<Edge*>> edgesGrouped;
-    for (const auto& [key, edgeList] : edgesByCepMap) {
-        edgesGrouped.push_back(edgeList);
-    }
-    
-    ///////////////////////////////////////////////////////////////////////////////
-    // Agrupar arestas por CEP
-    // vector<vector<Edge*>> edgesGrouped = groupEdgesByCepVector(edges);
-
-    // Processar cada região individualmente
-    for (size_t i = 0; i < edgesGrouped.size(); i++) {
-        const vector<Edge*>& regionEdges = edgesGrouped[i]; // Acessa apenas a lista da região atual
-    
-        // Converte a região atual para o formato esperado por findOptimalVertexFast
-        vector<vector<Edge*>> currentRegion = {regionEdges};
-    
-        // Encontra o vértice ótimo para a região
-        Vertex* optimalVertex = findOptimalVertexFast(currentRegion, adjacencyList);
-        if (optimalVertex) {
-            cout << "Região " << i << ": Vértice ótimo = " << optimalVertex->id() << endl;
-            cout << "Vértice " << optimalVertex->id() << " agora é uma estação de metrô: "
-                 << (optimalVertex->isMetroStation() ? "Sim" : "Não") << endl;
-        } else {
-            cout << "Região " << i << ": Não foi possível determinar o vértice ótimo.\n";
-        }
-    }
-
-    // Libera memória
-    for (auto& vertex : vertices) delete vertex;
-    for (auto& edge : edges) delete edge;
-
-
-    string jsonFilePath = "city_graph.json";
-
-    vector<Vertex*> vertices;
-    vector<Edge*> edges;
-
-    try {
-        parseJsonFile(jsonFilePath, vertices, edges);
-    } catch (const exception& e) {
-        cerr << "Error: " << e.what() << endl;
-        return 1;
-    }
-
-    // Matrizes e listas
-    vector<vector<Edge*>> adjacencyMatrix;
-    vector<vector<tuple<int, Edge*>>> adjacencyList;
-
-    generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
-    generateAdjacencyList(adjacencyMatrix, adjacencyList);
-
-    unordered_map<int, vector<Edge*>> edgesByCepMap;
-
-    // Agrupa arestas
-    for (const auto& edge : edges) {
-        edgesByCepMap[edge->id_zipCode()].push_back(edge);
-    }
-
-    // Imprime agrupamento
-    printEdgesGroupedByCepVector(edgesByCepMap);
-
-    // Converte unordered_map para vector<vector<Edge*>>
+    // Converte o mapa de arestas agrupadas para um vetor de vetores
     vector<vector<Edge*>> edgesGrouped;
     for (const auto& [key, edgeList] : edgesByCepMap) {
         edgesGrouped.push_back(edgeList);
     }
 
-    // Processar cada região individualmente
+    // Processa cada região individualmente, buscando o vértice ótimo para cada uma
     for (size_t i = 0; i < edgesGrouped.size(); i++) {
-        const vector<Edge*>& regionEdges = edgesGrouped[i]; // Acessa apenas a lista da região atual
+        const vector<Edge*>& regionEdges = edgesGrouped[i];  // Acessa as arestas da região atual
     
-        // Converte a região atual para o formato esperado por findOptimalVertexFast
+        // Converte a região para o formato esperado pela função que encontra o vértice ótimo
         vector<vector<Edge*>> currentRegion = {regionEdges};
     
-        // Encontra o vértice ótimo para a região
+        // Encontra o vértice ótimo da região
         Vertex* optimalVertex = findOptimalVertexFast(currentRegion, adjacencyList);
         if (optimalVertex) {
             cout << "Região " << i << ": Vértice ótimo = " << optimalVertex->id() << endl;
@@ -168,23 +69,47 @@ int main() {
     }
 
     // Adicionando lógica para a árvore de Steiner
-    vector<int> terminals;  // Lista de terminais (estações de metrô)
-    terminals.push_back(0); // Exemplo: Adicionar estação 0
-    terminals.push_back(1); // Exemplo: Adicionar estação 1
-    // Adicione os IDs dos terminais conforme necessário
+    vector<Vertex*> terminals;  // Agora é um vetor de ponteiros para Vertex
+    for (auto& vertex : vertices) {
+        if (vertex->isMetroStation()) { // Adiciona apenas vértices que são estações de metrô
+            terminals.push_back(vertex);
+        }
+    }
 
-    // Chama a função de cálculo da árvore de Steiner
-    vector<Edge*> steinerEdges = steinerTree(vertices, edges, terminals);
+    // Chama a função para calcular a árvore de Steiner
+    vector<Edge*> steinerEdges = steinerTree(vertices, adjacencyList, terminals);
 
     // Imprime as arestas da árvore de Steiner
     cout << "\nÁrvore de Steiner:" << endl;
     for (const auto& edge : steinerEdges) {
-        cout << "Aresta de " << edge->v1 << " a " << edge->v2 << " com distância " << edge->distance << endl;
+        cout << "Aresta de " << edge->vertex1()->id() << " a " << edge->vertex2()->id() 
+             << " com distância " << edge->distance() << endl;
     }
 
-    // Libera memória
+    // Preencher o vetor "stations" com as estações de metrô
+    vector<Vertex*> stations;
+    for (auto& vertex : vertices) {
+        if (vertex->isMetroStation()) {  // Adiciona apenas as estações de metrô
+            stations.push_back(vertex);
+        }
+    }
+
+    // Calcular a distância entre todas as estações de metrô
+    for (size_t i = 0; i < stations.size(); i++) {
+        for (size_t j = i + 1; j < stations.size(); j++) {
+            // Calcula a distância entre a estação[i] e a estação[j]
+            vector<int> dist, parent;
+            cptDijkstraFast(stations[i], parent, dist, adjacencyList);
+            int distance = dist[stations[j]->id()]; // Distância entre a estação[i] e a estação[j]
+
+            cout << "Distância entre a estação " << stations[i]->id() << " e " << stations[j]->id() 
+                 << ": " << distance << " unidades" << endl;
+        }
+    }
+
+    // Libera memória alocada para vértices e arestas
     for (auto& vertex : vertices) delete vertex;
-    for (auto& edge : edges) delete edge;
+    for (auto& edge : allEdges) delete edge;
 
     return 0;
 }
