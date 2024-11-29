@@ -4,7 +4,18 @@
 #include "vertexAndEdge.h"
 #include "steinerTree.h"
 #include <algorithm>
+#include <unordered_map>
 using namespace std;
+
+
+// Função para calcular o custo total entre dois vértices ótimos
+float calcularCustoTotal(const vector<tuple<int, Edge*>>& path) {
+    float totalCost = 0.0f;
+    for (const auto& [_, edge] : path) {
+        totalCost += edge->excavationCost();  // Soma o custo da escavação de cada aresta
+    }
+    return totalCost;
+}
 
 int main() {
     string jsonFilePath = "city_graph.json";  // Caminho para o arquivo JSON com os dados da cidade
@@ -52,6 +63,7 @@ int main() {
     }
 
     // Processa cada região individualmente, buscando o vértice ótimo para cada uma
+    vector<Vertex*> optimalVertices;
     for (size_t i = 0; i < edgesGrouped.size(); i++) {
         const vector<Edge*>& regionEdges = edgesGrouped[i];
 
@@ -64,104 +76,36 @@ int main() {
             cout << "Região " << i << ": Vértice ótimo = " << optimalVertex->id() << endl;
             cout << "Vértice " << optimalVertex->id() << " agora é uma estação de metrô: "
                  << (optimalVertex->isMetroStation() ? "Sim" : "Não") << endl;
+            optimalVertices.push_back(optimalVertex);  // Adiciona o vértice ótimo na lista
         } else {
             cout << "Região " << i << ": Não foi possível determinar o vértice ótimo.\n";
         }
     }
 
-    // Adicionando lógica para a árvore de Steiner
-    vector<Vertex*> terminals;
-    for (auto& vertex : vertices) {
-        if (vertex->isMetroStation()) {
-            terminals.push_back(vertex);
-        }
+    // Chamando a função steinerTree para os vértices ótimos
+    vector<Edge*> steinerEdges = steinerTree(vertices, adjacencyList, optimalVertices);
+
+    // Imprime as arestas da Árvore de Steiner
+    cout << "\nArestas da Árvore de Steiner:" << endl;
+    for (Edge* edge : steinerEdges) {
+        cout << "Aresta: " << edge->vertex1()->id() << " - " << edge->vertex2()->id() 
+             << " com custo de escavação: " << edge->excavationCost() << endl;
     }
 
-    vector<Edge*> steinerEdges = steinerTree(vertices, adjacencyList, terminals);
-
-    // Imprime as arestas da árvore de Steiner
-    cout << "\nÁrvore de Steiner:" << endl;
-    for (const auto& edge : steinerEdges) {
-        cout << "Aresta de " << edge->vertex1()->id() << " a " << edge->vertex2()->id()
-             << " com distância " << edge->distance() << endl;
-    }
-
-    // Gera a Árvore Geradora Mínima (MST) usando Kruskal
-    vector<Edge*> mstEdges = kruskal(vertices.size(), allEdges);
-
-    // Imprime as arestas da MST
-    cout << "\nÁrvore Geradora Mínima (MST):" << endl;
-    for (const auto& edge : mstEdges) {
-        cout << "Aresta de " << edge->vertex1()->id() << " a " << edge->vertex2()->id()
-             << " com distância " << edge->distance() << endl;
-    }
-
-    // Calcula a distância entre todas as estações de metrô
-    vector<Vertex*> stations;
-    for (auto& vertex : vertices) {
-        if (vertex->isMetroStation()) {
-            stations.push_back(vertex);
-        }
-    }
-
-    for (size_t i = 0; i < stations.size(); i++) {
-        for (size_t j = i + 1; j < stations.size(); j++) {
-            vector<int> dist, parent;
-            cptDijkstraFast(stations[i], parent, dist, adjacencyList);
-            int distance = dist[stations[j]->id()];
-
-            vector<int> path = reconstructPath(stations[i]->id(), stations[j]->id(), parent);
-
-            cout << "Distância entre a estação " << stations[i]->id() << " e " << stations[j]->id()
-                 << ": " << distance << " unidades" << endl;
-            cout << "Caminho: ";
-            for (int v : path) {
-                cout << v << " ";
-            }
-            cout << endl;
-        }
-    }
-    
-    // Imprime os vértices da Árvore de Steiner, mas apenas os vértices ótimos
-    cout << "\nÁrvore de Steiner (somente vértices ótimos):" << endl;
-    for (const auto& edge : steinerEdges) {
-        // Obtém os vértices conectados pela aresta
+     // Imprime a Árvore de Kruskal com os custos entre as estações ótimas
+    cout << "\nÁrvore de Kruskal (custo entre as estações ótimas):" << endl;
+    for (size_t i = 0; i < steinerEdges.size(); ++i) {
+        Edge* edge = steinerEdges[i];
         int u = edge->vertex1()->id();
         int v = edge->vertex2()->id();
-    
-        // Verifica se ambos os vértices são terminais (ou seja, vértices ótimos)
-        if (find(terminals.begin(), terminals.end(), edge->vertex1()) != terminals.end() &&
-            find(terminals.begin(), terminals.end(), edge->vertex2()) != terminals.end()) {
-            
-            // Obtém a distância da aresta (peso)
-            int weight = edge->distance();
-            
-            // Imprime os vértices e a distância
-            cout << "Vértices conectados: " << u << " - " << v 
-                 << " | Distância: " << weight << endl;
-        }
-    }
 
-    
-    // Imprime os vértices da Árvore Geradora Mínima (MST), mas somente os vértices ótimos
-    cout << "\nÁrvore Geradora Mínima (MST) (somente vértices ótimos):" << endl;
-    for (const auto& edge : mstEdges) {
-        // Obtém os vértices conectados pela aresta
-        int u = edge->vertex1()->id();
-        int v = edge->vertex2()->id();
-    
-        // Verifica se ambos os vértices são terminais (vértices ótimos)
-        if (find(terminals.begin(), terminals.end(), edge->vertex1()) != terminals.end() &&
-            find(terminals.begin(), terminals.end(), edge->vertex2()) != terminals.end()) {
-            
-            // Obtém a distância da aresta (peso)
-            int weight = edge->distance();
-    
-            // Imprime os vértices e a distância
-            cout << "Vértices conectados: " << u << " - " << v 
-                 << " | Distância: " << weight << endl;
-        }
+        // Calcula o custo total entre os vértices ótimos
+        float totalCost = calcularCustoTotal(adjacencyList[u]);
+
+        cout << "Custo da estação " << u << " para estação " << v 
+             << " é: " << totalCost << endl;
     }
+    
     // Libera memória
     for (auto& vertex : vertices) delete vertex;
     for (auto& edge : allEdges) delete edge;
