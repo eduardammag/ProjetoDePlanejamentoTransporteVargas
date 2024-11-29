@@ -2,7 +2,7 @@
 #include <climits>
 #include <queue>
 #include <algorithm>
-
+#include <algorithm>
 // Implementação da classe UnionFind
 UnionFind::UnionFind(int n) : parent(n), rank(n, 0) {
     for (int i = 0; i < n; ++i) parent[i] = i;
@@ -116,4 +116,19 @@ vector<Edge*> steinerTree(const vector<Vertex*>& vertices, const vector<vector<t
     }
 
     return steinerEdges;
+}
+
+// Função para reconstruir o caminho entre dois vértices
+vector<int> reconstructPath(int source, int target, const vector<int>& parent) {
+    vector<int> path;
+    for (int v = target; v != source; v = parent[v]) {
+        if (v == -1) { // Caso não haja caminho
+            path.clear();
+            break;
+        }
+        path.push_back(v);
+    }
+    path.push_back(source); // Adiciona a origem ao final
+    reverse(path.begin(), path.end()); // Reverte o caminho para que fique na ordem correta
+    return path;
 }
