@@ -7,7 +7,6 @@
 #include <unordered_map>
 using namespace std;
 
-
 // Função para calcular o custo total entre dois vértices ótimos
 float calcularCustoTotal(const vector<tuple<int, Edge*>>& path) {
     float totalCost = 0.0f;
@@ -16,6 +15,8 @@ float calcularCustoTotal(const vector<tuple<int, Edge*>>& path) {
     }
     return totalCost;
 }
+vector<vector<Edge*>> detailedPaths;  // Declaração do vetor para armazenar os caminhos detalhados
+
 
 int main() {
     string jsonFilePath = "city_graph.json";  // Caminho para o arquivo JSON com os dados da cidade
@@ -83,8 +84,11 @@ int main() {
     }
 
     // Chamando a função steinerTree para os vértices ótimos
-    vector<Edge*> steinerEdges = steinerTree(vertices, adjacencyList, optimalVertices);
+    vector<Edge*> steinerEdges = steinerTree(vertices, adjacencyList, optimalVertices, detailedPaths);
 
+
+    
+    
     // Imprime as arestas da Árvore de Steiner
     cout << "\nArestas da Árvore de Steiner:" << endl;
     for (Edge* edge : steinerEdges) {
@@ -92,7 +96,7 @@ int main() {
              << " com custo de escavação: " << edge->excavationCost() << endl;
     }
 
-     // Imprime a Árvore de Kruskal com os custos entre as estações ótimas
+    // Imprime a Árvore de Kruskal com os custos entre as estações ótimas
     cout << "\nÁrvore de Kruskal (custo entre as estações ótimas):" << endl;
     for (size_t i = 0; i < steinerEdges.size(); ++i) {
         Edge* edge = steinerEdges[i];
@@ -105,7 +109,33 @@ int main() {
         cout << "Custo da estação " << u << " para estação " << v 
              << " é: " << totalCost << endl;
     }
-    
+
+    // Variáveis para armazenar as arestas agregadas e os caminhos detalhados
+    vector<Edge*> aggregatedEdges; // Renomeie para evitar conflito
+    vector<vector<Edge*>> detailedPaths;  // Declaração do vetor para armazenar os caminhos detalhados
+
+    // Chamada para calcular a Árvore de Steiner com caminhos agregados
+    aggregatedEdges = steinerTree(vertices, adjacencyList, optimalVertices, detailedPaths);
+
+    // Imprime as arestas agregadas e os caminhos detalhados
+    cout << "\nÁrvore de Steiner (arestas agregadas):" << endl;
+    for (const auto& edge : aggregatedEdges) {
+        cout << "Aresta de " << edge->vertex1()->id() << " a " << edge->vertex2()->id() 
+             << " com custo total " << edge->excavationCost() << endl;
+    }
+
+    /*
+    // Imprime os caminhos detalhados
+    cout << "\nCaminhos detalhados entre terminais:" << endl;
+    for (size_t i = 0; i < detailedPaths.size(); ++i) {
+        cout << "Caminho detalhado para aresta agregada " << i + 1 << ":" << endl;
+        for (const Edge* edge : detailedPaths[i]) {
+            cout << "  Aresta de " << edge->vertex1()->id() << " a " << edge->vertex2()->id()
+                 << " com custo " << edge->excavationCost() << endl;
+        }
+    }
+    */
+
     // Libera memória
     for (auto& vertex : vertices) delete vertex;
     for (auto& edge : allEdges) delete edge;
