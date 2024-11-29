@@ -82,5 +82,3 @@ Vertex* findOptimalVertexFast(const vector<vector<Edge*>>& regionVertices, const
 
 
 }
-
-
