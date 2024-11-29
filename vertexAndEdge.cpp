@@ -1,29 +1,32 @@
 #include "vertexAndEdge.h"
-#include <random>
+#include <random> // Incluído para possíveis funcionalidades relacionadas a valores aleatórios.
 
-using namespace std; 
+using namespace std;
 
-//classe Vertex
+// Implementação da classe Vertex.
+
+// Construtor: Inicializa o vértice com o estado de estação de metrô e o ID.
 Vertex::Vertex(bool isMetroStation, int id)
     : m_isMetroStation(isMetroStation), m_id(id) {}
 
+// Setter: Define se o vértice é uma estação de metrô.
+void Vertex::setMetroStation(bool isMetroStation) {
+    m_isMetroStation = isMetroStation;
+}
 
-    // Setter para metro
-    void Vertex::setMetroStation(bool isMetroStation) 
-    {
-        m_isMetroStation = isMetroStation;
-    }
+// Getter: Retorna se o vértice é uma estação de metrô.
+bool Vertex::isMetroStation() const {
+    return m_isMetroStation;
+}
 
-    bool Vertex::isMetroStation() const 
-    {
-        return m_isMetroStation;
-    }
-    int Vertex::id() const 
-    {
-        return m_id;
-    }
+// Getter: Retorna o identificador único do vértice.
+int Vertex::id() const {
+    return m_id;
+}
 
-//classe Edge
+// Implementação da classe Edge.
+
+// Construtor: Inicializa a aresta com os parâmetros fornecidos.
 Edge::Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge, int id_zipCode)
     : m_distance(distance),
       m_vertex1(vertex1),
@@ -32,46 +35,45 @@ Edge::Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, in
       m_zipCode(id_zipCode),
       m_idEdge(idEdge) 
 {
-    m_excavationCost = distance / 2.0f; // Define o custo de escavação como metade da distância
+    m_excavationCost = distance / 2.0f; // Define o custo de escavação como metade da distância.
 }
 
-//Getters
-Vertex* Edge::vertex1() const
-{
+// Getter: Retorna o ponteiro para o primeiro vértice.
+Vertex* Edge::vertex1() const {
     return m_vertex1;
 }
 
-Vertex* Edge::vertex2() const
-{
+// Getter: Retorna o ponteiro para o segundo vértice.
+Vertex* Edge::vertex2() const {
     return m_vertex2;
 }
 
-int Edge::distance() const
-{
+// Getter: Retorna a distância entre os dois vértices.
+int Edge::distance() const {
     return m_distance;
 }
 
-int Edge::id_zipCode()
-{
+// Getter: Retorna o código postal associado à aresta.
+int Edge::id_zipCode() {
     return m_zipCode;
 }
 
-int Edge::id_street() const
-{
+// Getter: Retorna o ID da rua associada à aresta.
+int Edge::id_street() const {
     return m_street;
 }
 
-float Edge::trafficRate() const
-{
+// Getter: Retorna a taxa de tráfego na aresta.
+float Edge::trafficRate() const {
     return m_trafficRate;
 }
 
-float Edge::excavationCost() const
-{
+// Getter: Retorna o custo de escavação da aresta.
+float Edge::excavationCost() const {
     return m_excavationCost;
 }
 
-int Edge::idEdge() const
-{
+// Getter: Retorna o identificador único da aresta.
+int Edge::idEdge() const {
     return m_idEdge;
 }
