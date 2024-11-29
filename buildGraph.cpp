@@ -125,13 +125,17 @@ void generateAdjacencyList(const vector<vector<Edge*>>& adjacencyMatrix, vector<
 }
 
 // Função para imprimir o grafo (exibe as arestas de cada vértice)
-void Graph::printGraph() {
-    for (int i = 0; i < numVertices; i++) {
-        std::cout << "Vértice " << i << ": ";
+void printGraph(const std::vector<Vertex*>& vertices, const std::vector<std::vector<std::tuple<int, Edge*>>>& adjacencyList) {
+    for (int i = 0; i < vertices.size(); ++i) {
+        std::cout << "Vértice " << vertices[i]->id() << ": ";  // Imprime o ID do vértice
+
+        // Acessa as arestas do vértice i
         for (const auto& edge : adjacencyList[i]) {
-            int neighbor = std::get<0>(edge);
-            Edge* e = std::get<1>(edge);
-            std::cout << "(" << neighbor << ", " << e->getWeight() << ") ";
+            int neighbor = std::get<0>(edge);  // O índice do vértice vizinho
+            Edge* e = std::get<1>(edge);  // O ponteiro para a aresta
+
+            // Imprime a aresta com o ID dos vértices conectados e o peso da aresta
+            std::cout << "(" << vertices[neighbor]->id() << ", " << e->distance() << ") ";
         }
         std::cout << std::endl;
     }
