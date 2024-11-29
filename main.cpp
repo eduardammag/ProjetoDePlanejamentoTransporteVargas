@@ -3,6 +3,7 @@
 #include "findStation.h"
 #include "vertexAndEdge.h"
 #include "steinerTree.h"
+#include <algorithm>
 using namespace std;
 
 int main() {
@@ -101,11 +102,21 @@ int main() {
             vector<int> dist, parent;
             cptDijkstraFast(stations[i], parent, dist, adjacencyList);
             int distance = dist[stations[j]->id()]; // Distância entre a estação[i] e a estação[j]
-
+    
+            // Reconstrói o caminho entre as estações
+            vector<int> path = reconstructPath(stations[i]->id(), stations[j]->id(), parent);
+    
+            // Imprime a distância e o caminho
             cout << "Distância entre a estação " << stations[i]->id() << " e " << stations[j]->id() 
                  << ": " << distance << " unidades" << endl;
+            cout << "Caminho: ";
+            for (int v : path) {
+                cout << v << " ";
+            }
+            cout << endl;
         }
     }
+
 
     // Libera memória alocada para vértices e arestas
     for (auto& vertex : vertices) delete vertex;
