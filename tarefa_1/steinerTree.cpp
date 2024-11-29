@@ -49,7 +49,7 @@ vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges) {
     // Ordena as arestas pelo peso
     vector<Edge*> sortedEdges = edges;
     sort(sortedEdges.begin(), sortedEdges.end(), [](Edge* a, Edge* b) {
-        return a->distance() < b->distance(); // Supondo que 'distance()' retorne o peso
+        return a->excavationCost() < b->excavationCost(); // Supondo que 'distance()' retorne o peso
     });
 
     // Adiciona arestas ao MST enquanto evita ciclos
@@ -66,12 +66,14 @@ vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges) {
     return mstEdges;
 }
 
-// Função principal para calcular a Árvore de Steiner
+// Função principal para calcular a Árvore de Steiner com custos agregados
 vector<Edge*> steinerTree(const vector<Vertex*>& vertices, 
                           const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
                           const vector<Vertex*>& terminals) {
     vector<Edge*> allEdges;
 
+    int new_id_edge = 0;
+    
     // Calcula os caminhos mais curtos entre terminais
     vector<vector<int>> allShortestPaths(terminals.size());
     for (size_t i = 0; i < terminals.size(); ++i) {
@@ -82,21 +84,36 @@ vector<Edge*> steinerTree(const vector<Vertex*>& vertices,
     for (size_t i = 0; i < terminals.size(); ++i) {
         for (size_t j = i + 1; j < terminals.size(); ++j) {
             vector<int> path = reconstructPath(allShortestPaths[i], terminals[j]->id());
+
+            // Soma os custos das arestas entre os dois vértices
+            float totalExcavationCost = 0.0f;  // Use float, pois o custo de escavação pode ser decimal
             for (size_t k = 1; k < path.size(); ++k) {
                 int u = path[k - 1];
                 int v = path[k];
+
+                // Verifica se existe uma aresta entre os vértices u e v
                 for (const auto& adj : adjacencyList[u]) {
                     if (get<0>(adj) == v) {
-                        allEdges.push_back(get<1>(adj));
+                        totalExcavationCost += get<1>(adj)->excavationCost(); // Soma o custo de escavação
                     }
                 }
+            }
+            
+            // Agora, em vez de adicionar várias arestas, adiciona uma única aresta com o custo total
+            if (totalExcavationCost > 0) {
+                // Cria a aresta agregada com o custo total de escavação
+                Edge* newEdge = new Edge(new_id_edge++, terminals[i], terminals[j], 0.0f, 0, 0); 
+                // Aqui você pode configurar o ID da aresta ou outros valores se necessário
+                newEdge->setExcavationCost(totalExcavationCost);    
+                allEdges.push_back(newEdge);
             }
         }
     }
 
-    // Aplica Kruskal para obter a MST do subgrafo
+    // Aplica Kruskal para obter a MST do subgrafo com os custos agregados
     return kruskal(vertices.size(), allEdges);
 }
+
 
 // Função para reconstruir o caminho mais curto
 vector<int> reconstructPath(const vector<int>& parent, int destination) {
