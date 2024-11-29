@@ -163,6 +163,18 @@ int main() {
         }
     }
 
+    // Adicionando lógica para verificar se a lista de terminais está sendo preenchida corretamente
+    for (auto& vertex : vertices) {
+        if (vertex->isMetroStation()) {
+            terminals.push_back(vertex);
+        }
+    }
+    
+    // Imprime os terminais (vértices ótimos)
+    cout << "\nVértices ótimos (estações de metrô):" << endl;
+    for (const auto& terminal : terminals) {
+        cout << "Vértice ótimo: " << terminal->id() << endl;
+    }
 
 
 
