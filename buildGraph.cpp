@@ -124,6 +124,19 @@ void generateAdjacencyList(const vector<vector<Edge*>>& adjacencyMatrix, vector<
     }
 }
 
+// Função para imprimir o grafo (exibe as arestas de cada vértice)
+void Graph::printGraph() {
+    for (int i = 0; i < numVertices; i++) {
+        std::cout << "Vértice " << i << ": ";
+        for (const auto& edge : adjacencyList[i]) {
+            int neighbor = std::get<0>(edge);
+            Edge* e = std::get<1>(edge);
+            std::cout << "(" << neighbor << ", " << e->getWeight() << ") ";
+        }
+        std::cout << std::endl;
+    }
+}
+
 vector<vector<Edge*>> groupEdgesByCepVector(const vector<Edge*>& edges) {
     //Mapeia os `ceps` para listas de arestas
     unordered_map<int, vector<Edge*>> cepToEdgesMap;
