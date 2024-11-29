@@ -1,5 +1,5 @@
 #include "vertexAndEdge.h"
-#include <random> // Incluído para possíveis funcionalidades relacionadas a valores aleatórios.
+#include <random> // Para funcionalidades aleatórias, caso seja necessário em outras partes do código.
 
 using namespace std;
 
@@ -35,7 +35,8 @@ Edge::Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, in
       m_zipCode(id_zipCode),
       m_idEdge(idEdge) 
 {
-    m_excavationCost = distance / 2.0f; // Define o custo de escavação como metade da distância.
+    // Cálculo do custo de escavação: por enquanto, estamos assumindo que a metade da distância é o custo.
+    m_excavationCost = distance / 2.0f; 
 }
 
 // Getter: Retorna o ponteiro para o primeiro vértice.
@@ -76,4 +77,9 @@ float Edge::excavationCost() const {
 // Getter: Retorna o identificador único da aresta.
 int Edge::idEdge() const {
     return m_idEdge;
+}
+
+// Setter: Permite definir o custo de escavação.
+void Edge::setExcavationCost(float cost) {
+    m_excavationCost = cost;
 }
