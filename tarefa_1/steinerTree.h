@@ -52,8 +52,8 @@ vector<int> reconstructPath(int source, int target, const vector<int>& parent);
 // Declaração da função para construir a Árvore de Steiner
 vector<Edge*> steinerTree(const vector<Vertex*>& vertices, 
                           const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
-                          const vector<Vertex*>& terminals);
-
+                          const vector<Vertex*>& terminals, 
+                          vector<vector<Edge*>>& detailedPaths);
 // Declaração da função para construir a Árvore Geradora Mínima (MST) usando Kruskal
 vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges);
 
