@@ -49,12 +49,20 @@ vector<int> reconstructPath(const vector<int>& parent, int destination);
 // Declaração da função para reconstruir o caminho entre dois vértices (com origem e destino especificados)
 vector<int> reconstructPath(int source, int target, const vector<int>& parent);
 
-// Declaração da função para construir a Árvore de Steiner
-vector<Edge*> steinerTree(const vector<Vertex*>& vertices, 
-                          const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
-                          const vector<Vertex*>& terminals, 
-                          vector<vector<Edge*>>& detailedPaths);
+// Declaração da função para gerar os pares de terminais
+void generateTerminalPairs(const std::vector<Vertex*>& terminals, std::vector<std::pair<int, int>>& terminalPairs);
+
+// Declaração da função para calcular a Árvore de Steiner
+std::vector<Edge*> steinerTree(const std::vector<Vertex*>& vertices, 
+                                const std::vector<std::vector<std::tuple<int, Edge*>>>& adjacencyList, 
+                                const std::vector<Vertex*>& terminals, 
+                                std::vector<std::vector<Edge*>>& detailedPaths);
+                                
 // Declaração da função para construir a Árvore Geradora Mínima (MST) usando Kruskal
 vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges);
+
+void printDetailedPaths(const std::vector<std::vector<Edge*>>& detailedPaths, 
+                        const std::vector<Vertex*>& terminals);
+
 
 #endif // STEINER_TREE_H
