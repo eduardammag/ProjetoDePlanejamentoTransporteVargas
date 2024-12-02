@@ -5,6 +5,7 @@
 #include <vector>         // Para usar containers como vector
 #include <tuple>          // Para usar a tupla, útil para armazenar múltiplos valores
 #include <iostream> 
+#include <unordered_set>
 using namespace std;
 
 
