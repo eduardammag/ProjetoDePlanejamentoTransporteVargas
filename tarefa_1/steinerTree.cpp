@@ -7,6 +7,19 @@
 #include <iostream> 
 using namespace std;
 
+
+
+vector<pair<int, int>> generateTerminalPairs(const vector<Vertex*>& terminals) {
+    vector<pair<int, int>> terminalPairs;
+    for (size_t i = 0; i < terminals.size(); ++i) {
+        for (size_t j = i + 1; j < terminals.size(); ++j) {
+            terminalPairs.push_back({terminals[i]->id(), terminals[j]->id()});
+        }
+    }
+    return terminalPairs;
+}
+
+
 // Função para calcular o menor caminho entre os vértices usando o algoritmo de Dijkstra
 vector<int> dijkstra(const vector<vector<tuple<int, Edge*>>>& adjacencyList, int start) {
     int n = adjacencyList.size(); // Número de vértices no grafo
@@ -70,7 +83,6 @@ vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges) {
 }
 
 // Função principal para calcular a Árvore de Steiner com custos agregados
-// Função principal para calcular a Árvore de Steiner com custos agregados
 vector<Edge*> steinerTree(const vector<Vertex*>& vertices, 
                           const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
                           const vector<Vertex*>& terminals, 
@@ -83,6 +95,7 @@ vector<Edge*> steinerTree(const vector<Vertex*>& vertices,
     // Calcula os caminhos mais curtos entre todos os pares de terminais
     vector<vector<int>> allShortestPaths(terminals.size());
     for (size_t i = 0; i < terminals.size(); ++i) {
+        cout << "Calculando caminho mais curto a partir do terminal " << terminals[i]->id() << endl;
         allShortestPaths[i] = dijkstra(adjacencyList, terminals[i]->id()); // Chama a função de Dijkstra para cada terminal
     }
 
@@ -90,20 +103,37 @@ vector<Edge*> steinerTree(const vector<Vertex*>& vertices,
     for (size_t i = 0; i < terminals.size(); ++i) {
         for (size_t j = i + 1; j < terminals.size(); ++j) {
             vector<int> path = reconstructPath(allShortestPaths[i], terminals[j]->id()); // Reconstruir o caminho entre terminais
-            vector<Edge*> pathEdges; // Vetor para armazenar as arestas do caminho
 
+            if (path.empty()) {
+                cout << "Nenhum caminho encontrado entre " << terminals[i]->id() << " e " << terminals[j]->id() << endl;
+                continue; // Se não houver caminho, pula para o próximo par de terminais
+            }
+
+            cout << "Reconstruindo caminho entre " << terminals[i]->id() << " e " << terminals[j]->id() << endl;
+            cout << "Caminho: ";
+            for (int vertex : path) {
+                cout << vertex << " ";
+            }
+            cout << endl;
+
+            vector<Edge*> pathEdges; // Vetor para armazenar as arestas do caminho
             float totalExcavationCost = 0.0f; // Custo total de escavação do caminho
             for (size_t k = 1; k < path.size(); ++k) {
                 int u = path[k - 1];       // Vértice anterior
                 int v = path[k];           // Vértice atual
 
+                bool found = false;
                 // Percorre a lista de adjacência para encontrar a aresta entre u e v
                 for (const auto& adj : adjacencyList[u]) {
                     if (get<0>(adj) == v) {
                         totalExcavationCost += get<1>(adj)->excavationCost();  // Soma o custo de escavação
                         pathEdges.push_back(get<1>(adj));  // Adiciona a aresta ao caminho
+                        found = true;
                         break;
                     }
+                }
+                if (!found) {
+                    cout << "Aresta não encontrada entre " << u << " e " << v << endl;
                 }
             }
 
@@ -114,18 +144,6 @@ vector<Edge*> steinerTree(const vector<Vertex*>& vertices,
                 allEdges.push_back(newEdge); // Adiciona a nova aresta à lista
 
                 detailedPaths.push_back(pathEdges); // Armazena o caminho detalhado
-
-                // Imprime o caminho otimizado entre os terminais
-                cout << "Caminho otimizado entre os dois vértices " 
-                     << terminals[i]->id() << " e " << terminals[j]->id() << ":\n";
-                
-                // Imprime as arestas do caminho
-                for (Edge* edge : pathEdges) {
-                    cout << "Aresta entre " << edge->vertex1()->id() << " e " 
-                         << edge->vertex2()->id() << " com custo de escavação: " 
-                         << edge->excavationCost() << endl;
-                }
-                cout << "---------------------------------\n";
             }
         }
     }
@@ -135,6 +153,9 @@ vector<Edge*> steinerTree(const vector<Vertex*>& vertices,
 
     return steinerEdges; // Retorna as arestas da Árvore de Steiner
 }
+
+
+
 
 
 // Função para reconstruir o caminho mais curto a partir dos pais
@@ -160,4 +181,58 @@ vector<int> reconstructPath(int source, int target, const vector<int>& parent) {
     path.push_back(source);  // Adiciona a origem ao final do caminho
     reverse(path.begin(), path.end());  // Reverte para garantir a ordem correta
     return path;  // Retorna o caminho entre os dois vértices
+}
+
+void printDetailedPaths(const std::vector<std::vector<Edge*>>& detailedPaths, 
+                        const std::vector<Vertex*>& terminals) {
+    size_t n = terminals.size();
+
+    cout << "Número esperado de caminhos: " 
+         << (n * (n - 1)) / 2 << endl;
+    cout << "Número de caminhos em detailedPaths: " << detailedPaths.size() << endl;
+
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = i + 1; j < n; ++j) {
+            int terminal1 = terminals[i]->id();
+            int terminal2 = terminals[j]->id();
+
+            cout << "Caminho otimizado entre os dois vértices " << terminal1 << " e " << terminal2 << ":\n";
+
+            size_t index = (n * (n - 1)) / 2 - ((n - i) * (n - i - 1)) / 2 + (j - i - 1);
+
+            if (index >= detailedPaths.size()) {
+                cout << "Erro: Índice calculado (" << index << ") fora dos limites do vetor detailedPaths.\n";
+                cout << "Par: (" << terminal1 << ", " << terminal2 << "), "
+                     << "i: " << i << ", j: " << j << ", nTerminals: " << n << endl;
+                cout << "---------------------------------\n";
+                continue;
+            }
+
+            const auto& path = detailedPaths[index];
+
+            if (path.empty()) {
+                cout << "Nenhum caminho encontrado entre " << terminal1 << " e " << terminal2 << "\n";
+            } else {
+                cout << "Caminho: ";
+                std::unordered_set<int> seenVertices; // Conjunto para armazenar vértices já vistos
+                bool first = true;
+
+                for (const auto& edge : path) {
+                    int vertex = edge->vertex2()->id(); // Obtemos o ID do vértice destino da aresta
+
+                    if (seenVertices.find(vertex) == seenVertices.end()) {
+                        // Adiciona o vértice ao caminho apenas se não foi visto antes
+                        if (!first) {
+                            cout << " -> ";
+                        }
+                        cout << vertex;
+                        seenVertices.insert(vertex); // Marca o vértice como visto
+                        first = false;
+                    }
+                }
+                cout << endl; // Finaliza a linha do caminho
+            }
+            cout << "---------------------------------\n";
+        }
+    }
 }
