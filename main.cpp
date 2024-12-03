@@ -6,39 +6,6 @@
 #include <unordered_set>
 using namespace std;
 
-
-void printDetailedPaths(const vector<Edge*>& steinerEdges, 
-                        const vector<vector<tuple<int, Edge*>>>& adjacencyList) {
-
-    // Laço para percorrer todas as arestas da Árvore de Steiner
-    for (const Edge* edge : steinerEdges) {
-        int u = edge->vertex1()->id();  // ID do primeiro vértice
-        int v = edge->vertex2()->id();  // ID do segundo vértice
-
-        cout << "Detalhamento da Aresta (" << u << "-" << v << "), Peso: " 
-             << edge->excavationCost() << endl;
-
-        // Calcula o caminho detalhado entre os dois vértices u e v
-        vector<int> path = dijkstra(adjacencyList, u);  // Obtém o caminho mais curto de u
-        path = reconstructPath(path, v);  // Reconstrói o caminho de u para v
-
-        if (path.empty()) {
-            cout << "Nenhum caminho encontrado entre " << u << " e " << v << endl;
-            continue;
-        }
-
-        cout << "Caminho: ";
-        for (size_t i = 0; i < path.size(); ++i) {
-            cout << path[i];
-            if (i < path.size() - 1) {
-                cout << " -> ";
-            }
-        }
-        cout << endl;
-    }
-}
-
-
 int main() {
     string jsonFilePath = "city_graph.json";
 
@@ -60,7 +27,7 @@ int main() {
     generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
 
     // Gera a lista de adjacência
-    generateAdjacencyList(adjacencyMatrix, adjacencyList);
+    generateAdjacencyList(vertices, edges, adjacencyList);
 
     unordered_map<int, vector<Edge*>> edgesByCepMap;
 
