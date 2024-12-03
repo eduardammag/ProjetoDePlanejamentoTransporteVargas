@@ -1,4 +1,4 @@
-#include "steinerTree.h"
+#include "connectingMetro.h"
 #include <climits>        // Para trabalhar com valores de infinito (INT_MAX)
 #include <queue>          // Para usar fila de prioridade (priority_queue)
 #include <algorithm>      // Para usar funções como sort()
@@ -64,7 +64,7 @@ vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges) {
         // Se os vértices não estão conectados, adiciona a aresta à MST
         if (uf.find(u) != uf.find(v)) {
             mstEdges.push_back(edge);   // Adiciona a aresta à MST
-            uf.unite(u, v);             // Une os conjuntos de u e v
+            uf.unite(u, v);             // Une os conjuntoshttps://www.onlinegdb.com/#_editor_760118211 de u e v
         }
     }
 
@@ -72,7 +72,7 @@ vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges) {
 }
 
 // Função principal para calcular a Árvore de Steiner com custos agregados
-vector<Edge*> steinerTree(const vector<Vertex*>& vertices, 
+vector<Edge*> conect_metro(const vector<Vertex*>& vertices, 
                           const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
                           const vector<Vertex*>& terminals, 
                           vector<vector<Edge*>>& detailedPaths) {
@@ -125,11 +125,10 @@ vector<Edge*> steinerTree(const vector<Vertex*>& vertices,
     }
 
     // Aplica o algoritmo de Kruskal para calcular a MST das arestas agregadas
-    vector<Edge*> steinerEdges = kruskal(vertices.size(), allEdges);
+    vector<Edge*> connectedEdges = kruskal(vertices.size(), allEdges);
 
-    return steinerEdges; // Retorna as arestas da Árvore de Steiner
+    return connectedEdges; // Retorna as arestas da Árvore de Steiner
 }
-
 
 
 // Função para reconstruir o caminho mais curto a partir dos pais

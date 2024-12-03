@@ -2,13 +2,11 @@
 #include "buildGraph.h"
 #include "findStation.h"
 #include "vertexAndEdge.h"
-#include "steinerTree.h"
+#include "connectingMetro.h"
 #include <unordered_set>
 #include <vector>
 
 using namespace std;
-
-
 
 int main() {
     string jsonFilePath = "city_graph.json";
@@ -71,13 +69,11 @@ int main() {
         }
     }
     
-
     // Gerar os caminhos otimizados
     vector<vector<Edge*>> detailedPaths;
 
     // Calcular a Árvore de Steiner
-    vector<Edge*> steinerEdges = steinerTree(vertices, adjacencyList, optimalVertices, detailedPaths);
-
+    vector<Edge*> steinerEdges = conect_metro(vertices, adjacencyList, optimalVertices, detailedPaths);
     
     // Imprimir caminhos detalhados correspondentes às arestas
     cout << "\nCaminhos detalhados:\n";
