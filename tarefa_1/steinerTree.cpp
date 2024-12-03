@@ -28,22 +28,13 @@ void printAggregatedTree(const vector<Edge*>& steinerEdges) {
 }
 
 
-// Função que gera todos os pares de terminais a partir de um vetor de terminais.
 vector<pair<int, int>> generateTerminalPairs(const vector<Vertex*>& terminals) {
-    // Vetor para armazenar os pares de terminais.
     vector<pair<int, int>> terminalPairs;
-
-    // Laço para percorrer todos os terminais.
     for (size_t i = 0; i < terminals.size(); ++i) {
-        // Laço aninhado para criar pares de terminais. O segundo índice começa em 'i + 1'
-        // para garantir que cada par seja único (não repetido) e evitar pares reversos.
         for (size_t j = i + 1; j < terminals.size(); ++j) {
-            // Adiciona o par de terminais (IDs dos terminais) ao vetor 'terminalPairs'.
             terminalPairs.push_back({terminals[i]->id(), terminals[j]->id()});
         }
     }
-
-    // Retorna o vetor contendo todos os pares de terminais gerados.
     return terminalPairs;
 }
 
@@ -111,7 +102,7 @@ vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges) {
 }
 
 // Função principal para calcular a Árvore de Steiner com custos agregados
-vector<vector<Edge*>> steinerTree(const vector<Vertex*>& vertices, 
+vector<Edge*> steinerTree(const vector<Vertex*>& vertices, 
                           const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
                           const vector<Vertex*>& terminals, 
                           vector<vector<Edge*>>& detailedPaths) {
@@ -123,7 +114,6 @@ vector<vector<Edge*>> steinerTree(const vector<Vertex*>& vertices,
     // Calcula os caminhos mais curtos entre todos os pares de terminais
     vector<vector<int>> allShortestPaths(terminals.size());
     for (size_t i = 0; i < terminals.size(); ++i) {
-        cout << "Calculando caminho mais curto a partir do terminal " << terminals[i]->id() << endl;
         allShortestPaths[i] = dijkstra(adjacencyList, terminals[i]->id()); // Chama a função de Dijkstra para cada terminal
     }
 
@@ -131,18 +121,6 @@ vector<vector<Edge*>> steinerTree(const vector<Vertex*>& vertices,
     for (size_t i = 0; i < terminals.size(); ++i) {
         for (size_t j = i + 1; j < terminals.size(); ++j) {
             vector<int> path = reconstructPath(allShortestPaths[i], terminals[j]->id()); // Reconstruir o caminho entre terminais
-
-            if (path.empty()) {
-                cout << "Nenhum caminho encontrado entre " << terminals[i]->id() << " e " << terminals[j]->id() << endl;
-                continue; // Se não houver caminho, pula para o próximo par de terminais
-            }
-
-            cout << "Reconstruindo caminho entre " << terminals[i]->id() << " e " << terminals[j]->id() << endl;
-            cout << "Caminho: ";
-            for (int vertex : path) {
-                cout << vertex << " ";
-            }
-            cout << endl;
 
             vector<Edge*> pathEdges; // Vetor para armazenar as arestas do caminho
             float totalExcavationCost = 0.0f; // Custo total de escavação do caminho
@@ -167,9 +145,8 @@ vector<vector<Edge*>> steinerTree(const vector<Vertex*>& vertices,
 
             // Se o custo de escavação for positivo, cria uma nova aresta agregada
             if (totalExcavationCost > 0) {
-                Edge* newEdge = new Edge(totalExcavationCost, terminals[i], terminals[j], 0.0f, ++new_id_edge, 0);
+                Edge* newEdge = new Edge(totalExcavationCost, terminals[i], terminals[j], 0.0f, new_id_edge++, 0);
                 newEdge->setExcavationCost(totalExcavationCost); // Define o custo de escavação da nova aresta
-                cout << "teste id 1 " << newEdge->idEdge() << endl;
                 allEdges.push_back(newEdge); // Adiciona a nova aresta à lista
 
                 detailedPaths.push_back(pathEdges); // Armazena o caminho detalhado
@@ -178,17 +155,13 @@ vector<vector<Edge*>> steinerTree(const vector<Vertex*>& vertices,
     }
 
     // Aplica o algoritmo de Kruskal para calcular a MST das arestas agregadas
-    vector<Edge*> bestAgregatedEdges = kruskal(vertices.size(), allEdges);
-    vector<vector<Edge*>> MSTDetailedPaths;
-    for (const auto& bestEdge : bestAgregatedEdges)
-    {   
-        int bestId = bestEdge->idEdge();
-        cout << "TEste id" <<  bestId << endl;
-        MSTDetailedPaths.push_back(detailedPaths[bestId]);
-    }
+    vector<Edge*> steinerEdges = kruskal(vertices.size(), allEdges);
 
-    return MSTDetailedPaths; // Retorna as arestas da Árvore de Steiner
+    return steinerEdges; // Retorna as arestas da Árvore de Steiner
 }
+
+
+
 
 
 // Função para reconstruir o caminho mais curto a partir dos pais
@@ -216,71 +189,56 @@ vector<int> reconstructPath(int source, int target, const vector<int>& parent) {
     return path;  // Retorna o caminho entre os dois vértices
 }
 
-/*
-// Função para imprimir os caminhos detalhados entre os terminais, 
 void printDetailedPaths(const std::vector<std::vector<Edge*>>& detailedPaths, 
                         const std::vector<Vertex*>& terminals) {
-    size_t n = terminals.size(); // Obtém o número total de terminais.
+    size_t n = terminals.size();
 
-    // Imprime o número esperado de caminhos entre os pares de terminais.
     cout << "Número esperado de caminhos: " 
          << (n * (n - 1)) / 2 << endl;
-
-    // Imprime o número de caminhos presentes no vetor 'detailedPaths'.
     cout << "Número de caminhos em detailedPaths: " << detailedPaths.size() << endl;
 
-    // Laço para percorrer todos os pares de terminais.
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = i + 1; j < n; ++j) {
-            int terminal1 = terminals[i]->id(); // ID do primeiro terminal do par.
-            int terminal2 = terminals[j]->id(); // ID do segundo terminal do par.
+            int terminal1 = terminals[i]->id();
+            int terminal2 = terminals[j]->id();
 
-            // Imprime informações sobre o caminho entre o par de terminais.
             cout << "Caminho otimizado entre os dois vértices " << terminal1 << " e " << terminal2 << ":\n";
 
-            // Calcula o índice no vetor 'detailedPaths' que corresponde ao par de terminais atual.
             size_t index = (n * (n - 1)) / 2 - ((n - i) * (n - i - 1)) / 2 + (j - i - 1);
 
-            // Verifica se o índice calculado está dentro dos limites do vetor 'detailedPaths'.
             if (index >= detailedPaths.size()) {
                 cout << "Erro: Índice calculado (" << index << ") fora dos limites do vetor detailedPaths.\n";
                 cout << "Par: (" << terminal1 << ", " << terminal2 << "), "
                      << "i: " << i << ", j: " << j << ", nTerminals: " << n << endl;
                 cout << "---------------------------------\n";
-                continue; // Pula para o próximo par de terminais se o índice estiver fora dos limites.
+                continue;
             }
 
-            // Obtém o caminho detalhado entre os dois terminais.
             const auto& path = detailedPaths[index];
 
-            // Verifica se o caminho está vazio.
             if (path.empty()) {
                 cout << "Nenhum caminho encontrado entre " << terminal1 << " e " << terminal2 << "\n";
             } else {
                 cout << "Caminho: ";
-                std::unordered_set<int> seenVertices; // Conjunto para armazenar os vértices já visitados.
-                bool first = true; // Variável para controlar se é o primeiro vértice a ser impresso.
+                std::unordered_set<int> seenVertices; // Conjunto para armazenar vértices já vistos
+                bool first = true;
 
-                // Laço para percorrer as arestas do caminho.
                 for (const auto& edge : path) {
-                    int vertex = edge->vertex2()->id(); // Obtém o ID do vértice destino da aresta.
+                    int vertex = edge->vertex2()->id(); // Obtemos o ID do vértice destino da aresta
 
-                    // Verifica se o vértice já foi visto, para não imprimir vértices repetidos.
                     if (seenVertices.find(vertex) == seenVertices.end()) {
-                        // Se não for o primeiro vértice, imprime a seta (->).
+                        // Adiciona o vértice ao caminho apenas se não foi visto antes
                         if (!first) {
                             cout << " -> ";
                         }
-                        cout << vertex; // Imprime o ID do vértice.
-                        seenVertices.insert(vertex); // Marca o vértice como visitado.
-                        first = false; // Depois de imprimir o primeiro vértice, define 'first' como false.
+                        cout << vertex;
+                        seenVertices.insert(vertex); // Marca o vértice como visto
+                        first = false;
                     }
                 }
-                cout << endl; // Finaliza a linha do caminho.
+                cout << endl; // Finaliza a linha do caminho
             }
-            cout << "---------------------------------\n"; // Separa os resultados dos pares de terminais.
+            cout << "---------------------------------\n";
         }
     }
 }
-*/
-

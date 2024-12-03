@@ -4,7 +4,11 @@
 #include "vertexAndEdge.h"
 #include "steinerTree.h"
 #include <unordered_set>
+#include <vector>
+
 using namespace std;
+
+
 
 int main() {
     string jsonFilePath = "city_graph.json";
@@ -67,31 +71,23 @@ int main() {
         }
     }
     
-    cout << "\nNúmero de vértices ótimos encontrados: " << optimalVertices.size() << endl;
-    
+
     // Gerar os caminhos otimizados
     vector<vector<Edge*>> detailedPaths;
 
     // Calcular a Árvore de Steiner
-    vector<vector<Edge*>> steinerEdges = steinerTree(vertices, adjacencyList, optimalVertices, detailedPaths);
+    vector<Edge*> steinerEdges = steinerTree(vertices, adjacencyList, optimalVertices, detailedPaths);
+
     
-    for (const auto& path : steinerEdges)
-    {
-        cout << "Caminho entre estações:";
-        for (const auto& edge : path)
-        {
+    // Imprimir caminhos detalhados correspondentes às arestas
+    cout << "\nCaminhos detalhados:\n";
+    for (size_t i = 0; i < steinerEdges.size(); ++i) {
+        cout << "Caminho para a aresta " << steinerEdges[i]->idEdge() << ": ";
+        for (const auto& edge : detailedPaths[i]) {
             cout << edge->idEdge() << " ";
         }
         cout << endl;
     }
-    
-    // Imprimir os caminhos detalhados
-    //printDetailedPaths(detailedPaths, optimalVertices);
-    
-    //Imprime a arvore agregada 
-    // printAggregatedTree(steinerEdges);
-
-    // printDetailedPaths(steinerEdges, adjacencyList); // Chama a função ajustada
 
 
     return 0;
