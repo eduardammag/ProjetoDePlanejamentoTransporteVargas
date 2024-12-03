@@ -79,7 +79,7 @@ int main() {
     cout << "\nCaminhos detalhados:\n";
     for (size_t i = 0; i < steinerEdges.size(); ++i) {
         for (const auto& edge : detailedPaths[i]) {
-            cout << "Aresta entre vértice " << edge->vertex1() << " e " << edge->vertex2() << " ";
+            cout << "Aresta entre vértice " << edge->vertex1()->id() << " e " << edge->vertex2()->id() << " ";
         }
         cout << endl;
     }
