@@ -83,7 +83,8 @@ int main() {
     printDetailedPaths(detailedPaths, optimalVertices);
     
 
-
+    //Imprime a arvore agregada 
+    printAggregatedTree(steinerEdges);
 
 
 
