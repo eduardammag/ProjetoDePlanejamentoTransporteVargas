@@ -78,8 +78,9 @@ int main() {
     // Imprimir caminhos detalhados correspondentes às arestas
     cout << "\nCaminhos detalhados:\n";
     for (size_t i = 0; i < steinerEdges.size(); ++i) {
+        cout << "Aresta entre vértice ";
         for (const auto& edge : detailedPaths[i]) {
-            cout << "Aresta entre vértice " << edge->vertex1()->id() << " e " << edge->vertex2()->id() << " ";
+            cout  << edge->vertex1()->id() << " " << edge->vertex2()->id() << ", ";
         }
         cout << endl;
     }
