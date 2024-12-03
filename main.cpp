@@ -75,15 +75,13 @@ int main() {
     // Calcular a Árvore de Steiner
     vector<Edge*> steinerEdges = conect_metro(vertices, adjacencyList, optimalVertices, detailedPaths);
     
-    // Imprimir caminhos detalhados correspondentes às arestas
-    cout << "\nCaminhos detalhados:\n";
-    for (size_t i = 0; i < steinerEdges.size(); ++i) {
-        cout << "Aresta entre vértice ";
-        for (const auto& edge : detailedPaths[i]) {
-            cout  << edge->vertex1()->id() << " " << edge->vertex2()->id() << ", ";
-        }
-        cout << endl;
-    }
+    // Exibe as rotas 
+    printBestRoutes(steinerEdges, detailedPaths);
+    
+    int custo;
+    custo = totalCostSubway(steinerEdges, detailedPaths);
+    
+    cout << "Custo total: " << custo << endl;
 
 
     return 0;

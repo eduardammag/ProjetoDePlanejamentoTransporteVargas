@@ -140,3 +140,41 @@ vector<int> reconstructPath(const vector<int>& parent, int destination) {
     reverse(path.begin(), path.end());  // Reverte o caminho para a ordem correta
     return path;  // Retorna o caminho reconstruído
 }
+
+// Calcular o custo total das melhores rotas encontradas
+// contabilizando uma vez as arestas em comum
+int totalCostSubway(vector<Edge*> bestRoutes, vector<vector<Edge*>> detailedPaths)
+{
+    unordered_set<int> processedEdges;
+    int costTotal = 0;
+    for (size_t i = 0; i < bestRoutes.size(); ++i) 
+    {
+        for (const auto& edge : detailedPaths[i]) 
+        {
+            if (processedEdges.count(edge->idEdge())) continue;
+            else
+            {
+                processedEdges.insert(edge->idEdge());
+                costTotal += edge->excavationCost();
+            }
+        }
+    }
+    
+    return costTotal;
+}
+
+void printBestRoutes(vector<Edge*> bestRoutes, vector<vector<Edge*>> detailedPaths)
+{
+    
+    // Imprimir caminhos detalhados correspondentes às arestas agregadas
+    cout << "\nCaminhos detalhados:\n";
+    for (size_t i = 0; i < bestRoutes.size(); ++i) 
+    {
+        cout << "Aresta entre vértice ";
+        for (const auto& edge : detailedPaths[i]) 
+        {
+            cout  << edge->vertex1()->id() << " " << edge->vertex2()->id() << ", ";
+        }
+        cout << endl;
+    }
+}
