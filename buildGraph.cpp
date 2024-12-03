@@ -110,17 +110,20 @@ void generateAdjacencyMatrix(const vector<Vertex*>& vertices, const vector<Edge*
     }
 }
 
-void generateAdjacencyList(const vector<vector<Edge*>>& adjacencyMatrix, vector<vector<tuple<int, Edge*>>>& adjacencyList) {
-    int n = adjacencyMatrix.size();
+void generateAdjacencyList(const vector<Vertex*>& vertices, const vector<Edge*>& edges, vector<vector<tuple<int, Edge*>>>& adjacencyList) 
+{
+    int n = vertices.size();
     adjacencyList.resize(n);  //Inicializa a lista de adjacência
 
     //Preenche a lista de adjacência com tuplas (ID do vértice de destino, ponteiro para a aresta)
-    for (int i = 0; i < n; ++i) {
-        for (int j = 0; j < n; ++j) {
-            if (adjacencyMatrix[i][j] != nullptr) {  //Verifica se existe uma aresta
-                adjacencyList[i].push_back(make_tuple(j, adjacencyMatrix[i][j]));
-            }
-        }
+    for (const auto& edge : edges) 
+    {
+        int v1_id = edge->vertex1()->id();
+        int v2_id = edge->vertex2()->id();
+        
+        //Grafo não direcionado, então preenche ambos os lugares
+        adjacencyList[v1_id].push_back(make_tuple(v2_id, edge));
+        adjacencyList[v2_id].push_back(make_tuple(v1_id, edge));
     }
 }
 

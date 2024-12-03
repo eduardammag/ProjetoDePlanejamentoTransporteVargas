@@ -29,7 +29,7 @@ int main() {
     generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
 
     // Gera a lista de adjacência
-    generateAdjacencyList(adjacencyMatrix, adjacencyList);
+    generateAdjacencyList(vertices, edges, adjacencyList);
 
     unordered_map<int, vector<Edge*>> edgesByCepMap;
 

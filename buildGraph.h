@@ -13,8 +13,8 @@ void parseJsonFile(const string& filePath, vector<Vertex*>& vertices, vector<Edg
 //Função para gerar a matriz de adjacência
 void generateAdjacencyMatrix(const vector<Vertex*>& vertices, const vector<Edge*>& edges, vector<vector<Edge*>>& adjacencyMatrix);
 
-//Função para converter a matriz de adjacência para lista de adjacência
-void generateAdjacencyList(const vector<vector<Edge*>>& adjacencyMatrix, vector<vector<tuple<int, Edge*>>>& adjacencyList);
+//Função para gerar a lista de adjacência
+void generateAdjacencyList(const vector<Vertex*>& vertices, const vector<Edge*>& edges, vector<vector<tuple<int, Edge*>>>& adjacencyList);
 
 //Função para gerar um vetor de listas de arestas agrupadas por cep
 vector<vector<Edge*>> groupEdgesByCepVector(const vector<Edge*>& edges);
