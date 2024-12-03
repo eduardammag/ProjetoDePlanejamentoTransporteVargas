@@ -209,13 +209,13 @@ void bfs(Vertex* start,
                 processedEdges.insert(edge->idEdge());
                 Vertex* nextVertex = otherVertex(edge, current->id());
 
-                // se grau entrada 0, adiciona uma aresta para dentro
-                if (degreeIn[nextVertex->id()] < 1) 
+                // se grau entrada 0, adiciona uma aresta para dentro, apontando para current
+                if (degreeIn[current->id()] < 1) 
                 {
-                    directedAdj[nextVertex->id()].emplace_back(nextVertex->id(), edge);
+                    directedAdj[nextVertex->id()].emplace_back(current->id(), edge);
                     // atualiza os graus
-                    degreeOut[current->id()]++;
-                    degreeIn[nextVertex->id()]++;
+                    degreeIn[current->id()]++;
+                    degreeOut[nextVertex->id()]++;
                     
                     // Rua de mão dupla, aleatóriamente escolhida
                     if (rand() % 10 < 2) 
@@ -223,7 +223,7 @@ void bfs(Vertex* start,
                         // Criando a nova aresta com sentido oposto
                         int newId =  edge->idEdge() + 1000;
                         Edge* newEdge = new Edge(edge->distance(), edge->vertex1(), edge->vertex2(), edge->trafficRate(), newId, edge->id_zipCode());
-                        directedAdj[current->id()].emplace_back(current->id(), newEdge);
+                        directedAdj[current->id()].emplace_back(nextVertex->id(), newEdge);
                         degreeOut[current->id()]++;
                         degreeIn[nextVertex->id()]++;
                     }
@@ -231,7 +231,8 @@ void bfs(Vertex* start,
                 // se grau de saída 0, adiciona uma aresta para fora
                 else if (degreeOut[current->id()] < 1) 
                 {
-                    directedAdj[current->id()].emplace_back(current->id(), edge);
+                    //apontando para fora
+                    directedAdj[current->id()].emplace_back(nextVertex->id(), edge);
                     degreeOut[current->id()]++;
                     degreeIn[nextVertex->id()]++;
                     
@@ -239,28 +240,28 @@ void bfs(Vertex* start,
                     if (rand() % 10 < 2) 
                     { // Cria nova aresta com sentido oposto
                         Edge* newEdge = new Edge(edge->distance(), edge->vertex1(), edge->vertex2(), edge->trafficRate(), edge->idEdge()+1000, edge->id_zipCode());
-                        directedAdj[nextVertex->id()].emplace_back(nextVertex->id(), newEdge);
-                        degreeOut[nextVertex->id()]++;
+                        directedAdj[nextVertex->id()].emplace_back(current->id(), newEdge);
                         degreeIn[current->id()]++;
+                        degreeOut[nextVertex->id()]++;
                     }
                     
                 } 
                 else 
                 {
-                    // se já tiver grau de entrada e saída a direção é aleatória
+                    // se já tiver grau de entrada e saída a direção é aleatória, para fora ou para dentro
                     if (rand() % 2 == 0) 
                     {
                         // Para fora
-                        directedAdj[current->id()].emplace_back(current->id(), edge); 
+                        directedAdj[current->id()].emplace_back(nextVertex->id(), edge); 
                         degreeOut[current->id()]++;
                         degreeIn[nextVertex->id()]++;
                     } 
                     else 
                     {
                         // Para dentro
-                        directedAdj[nextVertex->id()].emplace_back(nextVertex->id(), edge); 
-                        degreeOut[nextVertex->id()]++;
+                        directedAdj[nextVertex->id()].emplace_back(current->id(), edge); 
                         degreeIn[current->id()]++;
+                        degreeOut[nextVertex->id()]++;
                     }
                 }
 

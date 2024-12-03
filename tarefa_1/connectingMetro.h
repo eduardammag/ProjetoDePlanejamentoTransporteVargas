@@ -61,9 +61,8 @@ std::vector<Edge*> conect_metro(const std::vector<Vertex*>& vertices,
 // Declaração da função para construir a Árvore Geradora Mínima (MST) usando Kruskal
 vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges);
 
-void printDetailedPaths(const std::vector<std::vector<Edge*>>& detailedPaths, 
-                        const std::vector<Vertex*>& terminals);
-
-void printAggregatedTree(const std::vector<Edge*>& steinerEdges);
-
+// Calculando o custo total, contabilizando uma vez arestas em comum
+int totalCostSubway(vector<Edge*> bestRoutes, vector<vector<Edge*>> detailedPaths);
+// Exibindo a melhor rota que conecta as estações
+void printBestRoutes(vector<Edge*> bestRoutes, vector<vector<Edge*>> detailedPaths);
 #endif // STEINER_TREE_H
