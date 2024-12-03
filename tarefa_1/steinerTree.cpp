@@ -8,6 +8,24 @@
 #include <unordered_set>
 using namespace std;
 
+//Imprime a Árvore de Steiner agregada
+void printAggregatedTree(const vector<Edge*>& steinerEdges) {
+    unordered_map<string, double> aggregatedEdges;
+
+    for (const auto& edge : steinerEdges) {
+        int u = min(edge->vertex1()->id(), edge->vertex2()->id());
+        int v = max(edge->vertex1()->id(), edge->vertex2()->id());
+        double weight = edge->excavationCost(); // Obtém o custo de escavação da aresta
+
+        string edgeKey = to_string(u) + "-" + to_string(v); // Chave única como string
+        aggregatedEdges[edgeKey] += weight; // Soma o peso da aresta
+    }
+
+    cout << "\nÁrvore de Steiner Agregada:\n";
+    for (const auto& [edgeKey, totalWeight] : aggregatedEdges) {
+        cout << "Aresta (" << edgeKey << "), Peso Agregado: " << totalWeight << endl;
+    }
+}
 
 
 vector<pair<int, int>> generateTerminalPairs(const vector<Vertex*>& terminals) {
