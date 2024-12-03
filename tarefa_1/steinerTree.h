@@ -64,5 +64,6 @@ vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges);
 void printDetailedPaths(const std::vector<std::vector<Edge*>>& detailedPaths, 
                         const std::vector<Vertex*>& terminals);
 
+void printAggregatedTree(const std::vector<Edge*>& steinerEdges);
 
 #endif // STEINER_TREE_H
