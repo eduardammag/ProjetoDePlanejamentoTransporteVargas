@@ -119,5 +119,21 @@ int main() {
     }
     
 
+    // Dijkstra a pé 
+    pair<vector<Edge*>, int> teste; 
+    
+    Vertex* comeco = vertices[0];
+    Vertex* fim = vertices[200];
+    teste = dijkstraFoot(comeco,  fim, adjacencyList);
+    
+    auto& edgesDijkstra =  get<0>(teste);
+    cout << "Arestas passadas ";
+    for (const auto& arestaDak : edgesDijkstra)
+    {
+        cout << arestaDak->idEdge() << " ";
+    }
+    
+    cout << endl;
+
     return 0;
 }
