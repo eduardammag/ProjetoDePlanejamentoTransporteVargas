@@ -6,6 +6,7 @@
 #include "fastRoute.h"
 #include <unordered_set>
 #include <vector>
+#include <queue>
 
 using namespace std;
 
@@ -31,6 +32,9 @@ int main() {
 
     // Gera a lista de adjacência
     generateAdjacencyList(vertices, edges, adjacencyList);
+
+    // Converte a lista de adjacência para uma representação dirigida
+    vector<vector<tuple<int, Edge*>>> directedAdjacencyList = convertToDirected(adjacencyList);
 
     // unordered_map<int, vector<Edge*>> edgesByCepMap;
 

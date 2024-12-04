@@ -4,7 +4,7 @@
 #include <stack>
 #include <queue>
 #include <iostream>
-
+#include <cfloat>
 using namespace std; 
 
 // Implementação da função cptDijkstraFast
