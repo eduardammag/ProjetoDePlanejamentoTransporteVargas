@@ -6,6 +6,7 @@
 #include "fastRoute.h"
 #include <unordered_set>
 #include <vector>
+#include <queue>
 
 using namespace std;
 
@@ -31,6 +32,9 @@ int main() {
 
     // Gera a lista de adjacência
     generateAdjacencyList(vertices, edges, adjacencyList);
+
+    // Converte a lista de adjacência para uma representação dirigida
+    vector<vector<tuple<int, Edge*>>> directedAdjacencyList = convertToDirected(adjacencyList);
 
     // unordered_map<int, vector<Edge*>> edgesByCepMap;
 
@@ -118,6 +122,38 @@ int main() {
         cout << "Nenhuma aresta encontrada para o número de imóvel informado." << endl;
     }
     
+
+    // Dijkstra a pé 
+    pair<vector<Edge*>, int> teste; 
+    
+    Vertex* comeco = vertices[0];
+    Vertex* fim = vertices[200];
+    teste = dijkstraFoot(comeco,  fim, adjacencyList);
+    
+    auto& edgesDijkstra =  get<0>(teste);
+    cout << "Arestas passadas ";
+    for (const auto& arestaDak : edgesDijkstra)
+    {
+        cout << arestaDak->idEdge() << " ";
+    }
+    
+    cout << endl;
+
+
+
+
+
+    // IDs dos vértices de origem e destino
+    int startVertex = 210;  // Exemplo: origem do táxi (ID do vértice de origem)
+    int destinationVertex = 217;  // Exemplo: destino do táxi (ID do vértice de destino)
+    
+    // Chama a função dijkstraTaxi para calcular o melhor caminho de táxi
+    auto [totalCost, totalTime, taxiEdges] = dijkstraTaxi(directedAdjacencyList, startVertex, destinationVertex);
+  
+
+
+
+
 
     return 0;
 }
