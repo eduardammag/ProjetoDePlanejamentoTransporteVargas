@@ -135,5 +135,21 @@ int main() {
     
     cout << endl;
 
+
+
+
+
+    // IDs dos vértices de origem e destino
+    int startVertex = 210;  // Exemplo: origem do táxi (ID do vértice de origem)
+    int destinationVertex = 217;  // Exemplo: destino do táxi (ID do vértice de destino)
+    
+    // Chama a função dijkstraTaxi para calcular o melhor caminho de táxi
+    auto [totalCost, totalTime, taxiEdges] = dijkstraTaxi(directedAdjacencyList, startVertex, destinationVertex);
+  
+
+
+
+
+
     return 0;
 }

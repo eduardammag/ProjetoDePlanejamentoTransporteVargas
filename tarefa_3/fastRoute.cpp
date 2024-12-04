@@ -136,3 +136,86 @@ Edge* findEdgeAddress(int street, int id_zipCode, int number_build, const vector
 
 
 // }
+
+// Função que calcula o menor caminho e custo usando Dijkstra para um táxi
+tuple<float, float, vector<int>> dijkstraTaxi(
+    const vector<vector<tuple<int, Edge*>>>& directedAdj, // Lista de adjacência representando o grafo dirigido
+    int start, // Vértice inicial
+    int destination // Vértice de destino
+) {
+    // Parâmetros relacionados ao táxi
+    float taxiRatePerMeter = 0.5f;  // Tarifa do táxi por metro percorrido
+    float maxSpeedKmH = 60.0f;      // Velocidade máxima permitida (em km/h)
+
+    // Número de vértices no grafo
+    int n = directedAdj.size();
+
+    // Vetores de controle para armazenar informações durante o cálculo
+    vector<float> minTime(n, FLT_MAX);  // Menor tempo de viagem para cada vértice
+    vector<float> totalCost(n, FLT_MAX);  // Menor custo total de viagem para cada vértice
+    vector<int> parent(n, -1);  // Para rastrear o caminho percorrido
+    vector<int> edgeUsed(n, -1);  // Para armazenar as arestas utilizadas no caminho
+
+    // Fila de prioridade para o Dijkstra, ordenada pelo menor tempo
+    priority_queue<pair<float, int>, vector<pair<float, int>>, greater<>> pq;
+
+    // Inicialização do vértice de início
+    minTime[start] = 0;
+    totalCost[start] = 0;
+    pq.push({0, start});  // Insere o vértice inicial na fila de prioridade
+
+    // Algoritmo principal do Dijkstra
+    while (!pq.empty()) {
+        // Extrai o vértice com o menor tempo acumulado
+        float currTime = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+
+        // Para cada aresta saindo do vértice atual
+        for (const auto& [v, edge] : directedAdj[u]) {
+            // Verifica se a taxa de tráfego é válida
+            if (edge->trafficRate() <= 0) continue;
+
+            // Calcula a velocidade real considerando a taxa de tráfego
+            float realSpeedKmH = maxSpeedKmH * edge->trafficRate();  // Velocidade em km/h
+            float realSpeedMPS = realSpeedKmH * (1000.0f / 3600.0f);  // Velocidade em metros por segundo
+
+            // Calcula o tempo necessário para percorrer a aresta (em minutos)
+            float edgeTime = edge->distance() / (realSpeedMPS * 60.0f);
+
+            // Relaxamento: verifica se encontrou um caminho mais rápido
+            if (currTime + edgeTime < minTime[v]) {
+                minTime[v] = currTime + edgeTime;  // Atualiza o menor tempo
+                totalCost[v] = totalCost[u] + edge->distance() * taxiRatePerMeter;  // Atualiza o custo total
+                parent[v] = u;  // Atualiza o vértice pai
+                edgeUsed[v] = edge->idEdge();  // Armazena a aresta utilizada
+                pq.push({minTime[v], v});  // Insere o vértice na fila de prioridade
+            }
+        }
+    }
+
+    // Reconstrução do caminho e das arestas percorridas
+    vector<int> edges;  // Vetor para armazenar as arestas do caminho
+    if (minTime[destination] < FLT_MAX) {  // Verifica se há caminho até o destino
+        for (int v = destination; v != start; v = parent[v]) {
+            if (v != -1) edges.push_back(edgeUsed[v]);  // Armazena a aresta utilizada
+        }
+        reverse(edges.begin(), edges.end());  // Inverte para a ordem correta
+    }
+
+    // Impressão dos resultados
+    if (minTime[destination] < FLT_MAX) {
+        cout << "Custo total da viagem de táxi: R$ " << totalCost[destination] << endl;
+        cout << "Tempo total de viagem de táxi: " << minTime[destination] << " minutos" << endl;
+        cout << "Arestas percorridas (IDs): ";
+        for (int edgeId : edges) {
+            cout << edgeId << " ";
+        }
+        cout << endl;
+    } else {
+        cout << "Não foi possível encontrar um caminho válido." << endl;
+    }
+
+    // Retorna o custo total, tempo total e as arestas percorridas
+    return {totalCost[destination], minTime[destination], edges};
+}
