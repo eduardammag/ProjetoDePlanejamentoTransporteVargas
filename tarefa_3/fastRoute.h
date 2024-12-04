@@ -14,7 +14,7 @@ pair<vector<Edge*>, int> dijkstraFoot(Vertex* start,  Vertex* destination, const
 
 
 // Declaração da função dijkstraTaxi
-tuple<float, float, vector<int>> dijkstraTaxi(
+tuple<float, float, vector<Edge*>> dijkstraTaxi(
     const vector<vector<tuple<int, Edge*>>>& directedAdj, // Lista de adjacência representando o grafo dirigido
     int start, // Vértice inicial
     int destination // Vértice de destino

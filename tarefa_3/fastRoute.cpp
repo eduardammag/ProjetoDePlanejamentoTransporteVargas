@@ -138,7 +138,7 @@ Edge* findEdgeAddress(int street, int id_zipCode, int number_build, const vector
 // }
 
 // Função que calcula o menor caminho e custo usando Dijkstra para um táxi
-tuple<float, float, vector<int>> dijkstraTaxi(
+tuple<float, float, vector<Edge*>> dijkstraTaxi(
     const vector<vector<tuple<int, Edge*>>>& directedAdj, // Lista de adjacência representando o grafo dirigido
     int start, // Vértice inicial
     int destination // Vértice de destino
@@ -154,7 +154,7 @@ tuple<float, float, vector<int>> dijkstraTaxi(
     vector<float> minTime(n, FLT_MAX);  // Menor tempo de viagem para cada vértice
     vector<float> totalCost(n, FLT_MAX);  // Menor custo total de viagem para cada vértice
     vector<int> parent(n, -1);  // Para rastrear o caminho percorrido
-    vector<int> edgeUsed(n, -1);  // Para armazenar as arestas utilizadas no caminho
+    vector<Edge*> edgeUsed(n, nullptr);  // Para armazenar as arestas utilizadas no caminho
 
     // Fila de prioridade para o Dijkstra, ordenada pelo menor tempo
     priority_queue<pair<float, int>, vector<pair<float, int>>, greater<>> pq;
@@ -188,16 +188,17 @@ tuple<float, float, vector<int>> dijkstraTaxi(
                 minTime[v] = currTime + edgeTime;  // Atualiza o menor tempo
                 totalCost[v] = totalCost[u] + edge->distance() * taxiRatePerMeter;  // Atualiza o custo total
                 parent[v] = u;  // Atualiza o vértice pai
-                edgeUsed[v] = edge->idEdge();  // Armazena a aresta utilizada
+                edgeUsed[v] = edge;  // Armazena a aresta utilizada
                 pq.push({minTime[v], v});  // Insere o vértice na fila de prioridade
             }
         }
     }
 
     // Reconstrução do caminho e das arestas percorridas
-    vector<int> edges;  // Vetor para armazenar as arestas do caminho
+    vector<Edge*> edges;  // Vetor para armazenar as arestas do caminho
     if (minTime[destination] < FLT_MAX) {  // Verifica se há caminho até o destino
-        for (int v = destination; v != start; v = parent[v]) {
+        for (int v = destination; v != start; v = parent[v]) 
+        {
             if (v != -1) edges.push_back(edgeUsed[v]);  // Armazena a aresta utilizada
         }
         reverse(edges.begin(), edges.end());  // Inverte para a ordem correta
@@ -208,8 +209,8 @@ tuple<float, float, vector<int>> dijkstraTaxi(
         cout << "Custo total da viagem de táxi: R$ " << totalCost[destination] << endl;
         cout << "Tempo total de viagem de táxi: " << minTime[destination] << " minutos" << endl;
         cout << "Arestas percorridas (IDs): ";
-        for (int edgeId : edges) {
-            cout << edgeId << " ";
+        for (Edge* edgePath : edges) {
+            cout << edgePath->idEdge() << " ";
         }
         cout << endl;
     } else {
