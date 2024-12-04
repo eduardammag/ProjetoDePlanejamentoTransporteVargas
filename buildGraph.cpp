@@ -7,86 +7,110 @@
 
 using namespace std;
 
-void parseJsonFile(const string& filePath, vector<Vertex*>& vertices, vector<Edge*>& edges) {
+void parseJsonFile(const string& filePath, vector<Vertex*>& vertices, vector<Edge*>& edges) 
+{
     ifstream file(filePath);
-    if (!file.is_open()) {
+    if (!file.is_open()) 
+    {
         throw runtime_error("Erro ao abrir o arquivo JSON: " + filePath);
     }
 
     string line;
     bool parsingVertices = false, parsingEdges = false;
 
-    while (getline(file, line)) {
+    while (getline(file, line)) 
+    {
         line.erase(0, line.find_first_not_of(" \t"));
         line.erase(line.find_last_not_of(" \t") + 1);
 
-        if (line.find("\"vertex\":") != string::npos) {
+        if (line.find("\"vertex\":") != string::npos) 
+        {
             parsingVertices = true;
             parsingEdges = false;
             continue;
         }
-        if (line.find("\"edges\":") != string::npos) {
+        if (line.find("\"edges\":") != string::npos) 
+        {
             parsingVertices = false;
             parsingEdges = true;
             continue;
         }
 
-        if (line.find("]") != string::npos) {
+        if (line.find("]") != string::npos) 
+        {
             parsingVertices = false;
             parsingEdges = false;
             continue;
         }
 
-        if (parsingVertices && line.find("{") != string::npos) {
+        if (parsingVertices && line.find("{") != string::npos) 
+        {
             int id = -1;
             bool isMetro = false;
 
-            while (getline(file, line) && line.find("}") == string::npos) {
+            while (getline(file, line) && line.find("}") == string::npos) 
+            {
                 line.erase(0, line.find_first_not_of(" \t"));
                 line.erase(line.find_last_not_of(" \t") + 1);
 
-                if (line.find("\"id_vertex\":") != string::npos) {
+                if (line.find("\"id_vertex\":") != string::npos) 
+                {
                     id = stoi(line.substr(line.find(":") + 1));
-                } else if (line.find("\"isMetroStation\":") != string::npos) {
+                } else if (line.find("\"isMetroStation\":") != string::npos) 
+                {
                     isMetro = line.find("true") != string::npos;
                 }
             }
             vertices.push_back(new Vertex(isMetro, id));
         }
 
-        if (parsingEdges && line.find("{") != string::npos) {
+        if (parsingEdges && line.find("{") != string::npos) 
+        {
             int idEdge = -1, v1 = -1, v2 = -1, distance = 0;
-            float trafficRate = 0.0f; int id_zipCode = 0;
+            float trafficRate = 0.0f; int id_zipCode = 0; 
+            int id_street = 0;
 
-            while (getline(file, line) && line.find("}") == string::npos) {
+            while (getline(file, line) && line.find("}") == string::npos) 
+            {
                 line.erase(0, line.find_first_not_of(" \t"));
                 line.erase(line.find_last_not_of(" \t") + 1);
 
-                if (line.find("\"id_edge\":") != string::npos) {
+                if (line.find("\"id_edge\":") != string::npos) 
+                {
                     idEdge = stoi(line.substr(line.find(":") + 1));
-                } else if (line.find("\"v1\":") != string::npos) {
+                } else if (line.find("\"v1\":") != string::npos) 
+                {
                     v1 = stoi(line.substr(line.find(":") + 1));
-                } else if (line.find("\"v2\":") != string::npos) {
+                } else if (line.find("\"v2\":") != string::npos) 
+                {
                     v2 = stoi(line.substr(line.find(":") + 1));
-                } else if (line.find("\"distance\":") != string::npos) {
+                } else if (line.find("\"distance\":") != string::npos) 
+                {
                     distance = stoi(line.substr(line.find(":") + 1));
-                } else if (line.find("\"traficRate\":") != string::npos) {
+                } else if (line.find("\"traficRate\":") != string::npos) 
+                {
                     trafficRate = stof(line.substr(line.find(":") + 1));
-                } else if (line.find("\"cep\":") != string::npos) {
+                } else if (line.find("\"cep\":") != string::npos) 
+                {
                     id_zipCode = stof(line.substr(line.find(":") + 1));
+                } else if (line.find("\"street_number\":") != string::npos) 
+                {
+                    id_street = stof(line.substr(line.find(":") + 1));
                 }
             }
 
             Vertex* vertex1 = nullptr;
             Vertex* vertex2 = nullptr;
 
-            for (const auto& vertex : vertices) {
+            for (const auto& vertex : vertices) 
+            {
                 if (vertex->id() == v1) vertex1 = vertex;
                 if (vertex->id() == v2) vertex2 = vertex;
             }
 
-            if (vertex1 && vertex2) {
-                Edge* edge = new Edge(distance, vertex1, vertex2, trafficRate, idEdge, id_zipCode);
+            if (vertex1 && vertex2) 
+            {
+                Edge* edge = new Edge(distance, vertex1, vertex2, trafficRate, idEdge, id_zipCode, id_street);
                 edges.push_back(edge);
             }
         }
@@ -222,7 +246,7 @@ void bfs(Vertex* start,
                     {   
                         // Criando a nova aresta com sentido oposto
                         int newId =  edge->idEdge() + 1000;
-                        Edge* newEdge = new Edge(edge->distance(), edge->vertex1(), edge->vertex2(), edge->trafficRate(), newId, edge->id_zipCode());
+                        Edge* newEdge = new Edge(edge->distance(), edge->vertex1(), edge->vertex2(), edge->trafficRate(), newId, edge->id_zipCode(), edge->id_street());
                         directedAdj[current->id()].emplace_back(nextVertex->id(), newEdge);
                         degreeOut[current->id()]++;
                         degreeIn[nextVertex->id()]++;
@@ -239,7 +263,7 @@ void bfs(Vertex* start,
                     // Rua de mão dupla, aleatóriamente escolhida
                     if (rand() % 10 < 2) 
                     { // Cria nova aresta com sentido oposto
-                        Edge* newEdge = new Edge(edge->distance(), edge->vertex1(), edge->vertex2(), edge->trafficRate(), edge->idEdge()+1000, edge->id_zipCode());
+                        Edge* newEdge = new Edge(edge->distance(), edge->vertex1(), edge->vertex2(), edge->trafficRate(), edge->idEdge()+1000, edge->id_zipCode(), edge->id_street());
                         directedAdj[nextVertex->id()].emplace_back(current->id(), newEdge);
                         degreeIn[current->id()]++;
                         degreeOut[nextVertex->id()]++;

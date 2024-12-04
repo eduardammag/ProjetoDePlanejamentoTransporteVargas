@@ -27,17 +27,18 @@ int Vertex::id() const {
 // Implementação da classe Edge.
 
 // Construtor: Inicializa a aresta com os parâmetros fornecidos.
-Edge::Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge, int id_zipCode)
+Edge::Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge, int id_zipCode, int id_street)
     : m_distance(distance),
       m_vertex1(vertex1),
       m_vertex2(vertex2),
       m_trafficRate(trafficRate),
       m_zipCode(id_zipCode),
-      m_idEdge(idEdge) 
-{
+      m_idEdge(idEdge),
+      m_street(id_street)
+    {
     // Cálculo do custo de escavação: por enquanto, estamos assumindo que a metade da distância é o custo.
-    m_excavationCost = distance / 2.0f; 
-}
+        m_excavationCost = (distance / 2.0f);
+    }
 
 // Getter: Retorna o ponteiro para o primeiro vértice.
 Vertex* Edge::vertex1() const {

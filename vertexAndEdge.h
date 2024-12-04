@@ -36,7 +36,7 @@ private:
 
 public:
     // Construtor: Inicializa uma aresta com os parâmetros necessários.
-    Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge, int id_zipCode);
+    Edge(int distance, Vertex* vertex1, Vertex* vertex2, float trafficRate, int idEdge, int id_zipCode, int id_street);
 
     // Getter: Retorna o ponteiro para o primeiro vértice.
     Vertex* vertex1() const;

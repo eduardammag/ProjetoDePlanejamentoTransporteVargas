@@ -115,7 +115,7 @@ vector<Edge*> conect_metro(const vector<Vertex*>& vertices,
 
             // Se o custo de escavação for positivo, cria uma nova aresta agregada
             if (totalExcavationCost > 0) {
-                Edge* newEdge = new Edge(totalExcavationCost, terminals[i], terminals[j], 0.0f, new_id_edge++, 0);
+                Edge* newEdge = new Edge(totalExcavationCost, terminals[i], terminals[j], 0.0f, new_id_edge++, 0, 0);
                 newEdge->setExcavationCost(totalExcavationCost); // Define o custo de escavação da nova aresta
                 allEdges.push_back(newEdge); // Adiciona a nova aresta à lista
 
