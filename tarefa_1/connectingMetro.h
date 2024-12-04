@@ -53,7 +53,7 @@ vector<int> reconstructPath(int source, int target, const vector<int>& parent);
 void generateTerminalPairs(const std::vector<Vertex*>& terminals, std::vector<std::pair<int, int>>& terminalPairs);
 
 // Declaração da função para calcular a Árvore de Steiner
-std::vector<Edge*> conect_metro(const std::vector<Vertex*>& vertices, 
+vector<vector<tuple<int, Edge*>>> conect_metro(const std::vector<Vertex*>& vertices, 
                                 const std::vector<std::vector<std::tuple<int, Edge*>>>& adjacencyList, 
                                 const std::vector<Vertex*>& terminals, 
                                 std::vector<std::vector<Edge*>>& detailedPaths);

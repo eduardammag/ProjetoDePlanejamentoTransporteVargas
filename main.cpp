@@ -6,12 +6,11 @@
 #include "fastRoute.h"
 #include <unordered_set>
 #include <vector>
-#include <queue>
 
 using namespace std;
 
 int main() {
-    string jsonFilePath = "city_graph_3_estacoes.json";
+    string jsonFilePath = "city_graph.json";
 
     vector<Vertex*> vertices;
     vector<Edge*> edges;
@@ -33,46 +32,43 @@ int main() {
     // Gera a lista de adjacência
     generateAdjacencyList(vertices, edges, adjacencyList);
 
-    // Converte a lista de adjacência para uma representação dirigida
-    vector<vector<tuple<int, Edge*>>> directedAdjacencyList = convertToDirected(adjacencyList);
+    unordered_map<int, vector<Edge*>> edgesByCepMap;
 
-    // unordered_map<int, vector<Edge*>> edgesByCepMap;
+    // Agrupa arestas
+    for (const auto& edge : edges) {
+        edgesByCepMap[edge->id_zipCode()].push_back(edge);
+    }
 
-    // // Agrupa arestas
-    // for (const auto& edge : edges) {
-    //     edgesByCepMap[edge->id_zipCode()].push_back(edge);
-    // }
+    // Imprime agrupamento
+    printEdgesGroupedByCepVector(edgesByCepMap);
 
-    // // Imprime agrupamento
-    // printEdgesGroupedByCepVector(edgesByCepMap);
-
-    // // Converte unordered_map para vector<vector<Edge*>>
-    // vector<vector<Edge*>> edgesGrouped;
-    // for (const auto& [key, edgeList] : edgesByCepMap) {
-    //     edgesGrouped.push_back(edgeList);
-    // }
+    // Converte unordered_map para vector<vector<Edge*>>
+    vector<vector<Edge*>> edgesGrouped;
+    for (const auto& [key, edgeList] : edgesByCepMap) {
+        edgesGrouped.push_back(edgeList);
+    }
     
-    // // Lista para armazenar os vértices ótimos
-    // vector<Vertex*> optimalVertices;
+    // Lista para armazenar os vértices ótimos
+    vector<Vertex*> optimalVertices;
     
-    // // Processar cada região individualmente
-    // for (size_t i = 0; i < edgesGrouped.size(); i++) {
-    //     const vector<Edge*>& regionEdges = edgesGrouped[i]; // Acessa apenas a lista da região atual
+    // Processar cada região individualmente
+    for (size_t i = 0; i < edgesGrouped.size(); i++) {
+        const vector<Edge*>& regionEdges = edgesGrouped[i]; // Acessa apenas a lista da região atual
     
-    //     // Converte a região atual para o formato esperado por findOptimalVertexFast
-    //     vector<vector<Edge*>> currentRegion = {regionEdges};
+        // Converte a região atual para o formato esperado por findOptimalVertexFast
+        vector<vector<Edge*>> currentRegion = {regionEdges};
     
-    //     // Encontra o vértice ótimo para a região
-    //     Vertex* optimalVertex = findOptimalVertexFast(currentRegion, adjacencyList);
-    //     if (optimalVertex) {
-    //         cout << "Região " << i << ": Vértice ótimo = " << optimalVertex->id() << endl;
-    //         cout << "Vértice " << optimalVertex->id() << " agora é uma estação de metrô: "
-    //              << (optimalVertex->isMetroStation() ? "Sim" : "Não") << endl;
-    //         optimalVertices.push_back(optimalVertex); // Adiciona o vértice ótimo à lista
-    //     } else {
-    //         cout << "Região " << i << ": Não foi possível determinar o vértice ótimo.\n";
-    //     }
-    // }
+        // Encontra o vértice ótimo para a região
+        Vertex* optimalVertex = findOptimalVertexFast(currentRegion, adjacencyList);
+        if (optimalVertex) {
+            cout << "Região " << i << ": Vértice ótimo = " << optimalVertex->id() << endl;
+            cout << "Vértice " << optimalVertex->id() << " agora é uma estação de metrô: "
+                 << (optimalVertex->isMetroStation() ? "Sim" : "Não") << endl;
+            optimalVertices.push_back(optimalVertex); // Adiciona o vértice ótimo à lista
+        } else {
+            cout << "Região " << i << ": Não foi possível determinar o vértice ótimo.\n";
+        }
+    }
     
     // // Gerar os caminhos otimizados
     // vector<vector<Edge*>> detailedPaths;
@@ -138,22 +134,13 @@ int main() {
     }
     
     cout << endl;
-
-
-
-
-
-    // IDs dos vértices de origem e destino
-    int startVertex = 210;  // Exemplo: origem do táxi (ID do vértice de origem)
-    int destinationVertex = 217;  // Exemplo: destino do táxi (ID do vértice de destino)
     
-    // Chama a função dijkstraTaxi para calcular o melhor caminho de táxi
-    auto [totalCost, totalTime, taxiEdges] = dijkstraTaxi(directedAdjacencyList, startVertex, destinationVertex);
-  
-
-
-
-
+    vector<vector<tuple<int, Edge*>>>  mstadj;
+    vector<vector<Edge*>> detailedPaths;
+    mstadj =  conect_metro(vertices, adjacencyList, optimalVertices, detailedPaths);
+    cout << "processou" << endl;
+    
+    printDirectedAdjacencyList(mstadj);
 
     return 0;
 }

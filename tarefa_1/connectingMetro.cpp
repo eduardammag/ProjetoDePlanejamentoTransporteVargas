@@ -72,7 +72,7 @@ vector<Edge*> kruskal(int numVertices, const vector<Edge*>& edges) {
 }
 
 // Função principal para calcular a Árvore de Steiner com custos agregados
-vector<Edge*> conect_metro(const vector<Vertex*>& vertices, 
+vector<vector<tuple<int, Edge*>>> conect_metro(const vector<Vertex*>& vertices, 
                           const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
                           const vector<Vertex*>& terminals, 
                           vector<vector<Edge*>>& detailedPaths) {
@@ -125,9 +125,26 @@ vector<Edge*> conect_metro(const vector<Vertex*>& vertices,
     }
 
     // Aplica o algoritmo de Kruskal para calcular a MST das arestas agregadas
-    vector<Edge*> connectedEdges = kruskal(vertices.size(), allEdges);
+    vector<Edge*> bestAgregatedEdges = kruskal(vertices.size(), allEdges);
+    vector<Edge*> MSTEdgespaths;
+    
 
-    return connectedEdges; // Retorna as arestas da Árvore de Steiner
+    for (const auto& bestEdge : bestAgregatedEdges)
+    {   
+        int bestId = bestEdge->idEdge();
+        for (const auto& edgeDetailed : detailedPaths[bestId])
+        {
+            MSTEdgespaths.emplace_back(edgeDetailed);
+        }
+    }
+
+    // Matrizes e listas
+    vector<vector<tuple<int, Edge*>>> MSTadjacencyList;
+
+    // Gera a lista de adjacência
+    generateAdjacencyList(vertices, MSTEdgespaths, MSTadjacencyList);
+
+    return MSTadjacencyList; // Retorna as arestas da Árvore de Steiner
 }
 
 
