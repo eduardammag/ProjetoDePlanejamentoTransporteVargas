@@ -5,6 +5,15 @@
 #include <queue>
 #include <iostream>
 #include <cfloat>
+#include <vector>
+#include <tuple>
+#include <unordered_set>
+#include <unordered_map>
+#include <algorithm>
+#include <stdexcept>
+#include <functional>
+
+
 using namespace std; 
 
 // Implementação da função cptDijkstraFast
@@ -234,4 +243,123 @@ vector<Edge*> findBestPath(pair<Edge*, Vertex*> start, pair<Edge*, Vertex*> dest
 
     cout << "Nenhum caminho a pé mais rápido que o de carro foi encontrado, mas o custo de carro excede o orçamento." << endl;
     return {};
+}
+
+
+//Função que encontra o caminho entre as estações de duas regiões específicas e 
+// retorna a tupla contendo IDs de vértices no caminho, os custos entre vértices, 
+// Vetor com os IDs dos vértices das estações do caminho
+tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
+    const vector<vector<tuple<int, Edge*>>>& mstadj, // Lista de adjacência da MST
+    int region1CEP, // CEP da região 1
+    int region2CEP // CEP da região 2
+) {
+    vector<int> path; // Caminho completo (vértices visitados)
+    vector<int> segmentDistances; // Custos entre estações de metrô
+    vector<int> stations; // Apenas estações de metrô no caminho
+
+    // Localiza as estações de metrô associadas aos CEPs fornecidos
+    Vertex* station1 = nullptr;
+    Vertex* station2 = nullptr;
+
+    // Busca as estações de metrô diretamente na lista de adjacência
+    for (size_t i = 0; i < mstadj.size(); ++i) {
+        for (const auto& [neighbor, edge] : mstadj[i]) {
+            if (edge->id_zipCode() == region1CEP) {
+                if (edge->vertex1()->isMetroStation()) {
+                    station1 = edge->vertex1();
+                } else if (edge->vertex2()->isMetroStation()) {
+                    station1 = edge->vertex2();
+                }
+            }
+            if (edge->id_zipCode() == region2CEP) {
+                if (edge->vertex1()->isMetroStation()) {
+                    station2 = edge->vertex1();
+                } else if (edge->vertex2()->isMetroStation()) {
+                    station2 = edge->vertex2();
+                }
+            }
+            if (station1 && station2) break; // Se ambas as estações foram encontradas, encerra a busca
+        }
+        if (station1 && station2) break;
+    }
+
+    // Verifica se ambas as estações foram encontradas
+    if (!station1 || !station2) {
+        throw runtime_error("Não foi possível encontrar estações para os CEPs fornecidos.");
+    }
+
+    // Busca em profundidade (DFS) para encontrar o caminho
+    unordered_map<int, int> parent; // Para reconstruir o caminho
+    unordered_set<int> visited; // Conjunto para marcar vértices visitados
+
+    // Função auxiliar para DFS
+    function<bool(int)> dfs = [&](int current) -> bool {
+        visited.insert(current); // Marca o vértice atual como visitado
+
+        if (current == station2->id()) return true; // Se encontrou o destino, retorna verdadeiro
+
+        for (const auto& [neighbor, edge] : mstadj[current]) {
+            if (!visited.count(neighbor)) { // Se o vizinho ainda não foi visitado
+                parent[neighbor] = current; // Define o pai do vizinho como o vértice atual
+                if (dfs(neighbor)) return true; // Continua a busca recursiva
+            }
+        }
+        return false; // Não encontrou o destino nesse caminho
+    };
+
+    // Inicializa a DFS a partir da estação inicial
+    parent[station1->id()] = -1; // A estação inicial não tem pai
+    if (!dfs(station1->id())) {
+        throw runtime_error("Não foi possível encontrar um caminho entre as estações fornecidas.");
+    }
+
+    // Reconstrói o caminho a partir do mapa de pais
+    int current = station2->id();
+    while (current != -1) {
+        path.push_back(current);
+        current = parent[current];
+    }
+    reverse(path.begin(), path.end()); // Reverte o caminho para a ordem correta
+
+    // Filtra apenas as estações de metrô no caminho
+    for (int vertex : path) {
+        for (const auto& [neighbor, edge] : mstadj[vertex]) {
+            if ((edge->vertex1()->id() == vertex && edge->vertex1()->isMetroStation()) ||
+                (edge->vertex2()->id() == vertex && edge->vertex2()->isMetroStation())) {
+                if (stations.empty() || stations.back() != vertex) {
+                    stations.push_back(vertex); // Evita duplicar a mesma estação
+                }
+                break;
+            }
+        }
+    }
+
+    // Calcula os custos entre estações de metrô
+    for (size_t i = 1; i < stations.size(); ++i) {
+        int stationStart = stations[i - 1];
+        int stationEnd = stations[i];
+        int segmentCost = 0;
+
+        // Calcula o custo do subcaminho entre estações consecutivas
+        for (size_t j = 1; j < path.size(); ++j) {
+            int v1 = path[j - 1];
+            int v2 = path[j];
+
+            // Adiciona os custos ao segmento enquanto estiver dentro das duas estações
+            if ((v1 == stationStart || v1 == stationEnd) || segmentCost > 0) {
+                for (const auto& [neighbor, edge] : mstadj[v1]) {
+                    if (neighbor == v2) {
+                        segmentCost += edge->distance();
+                        break;
+                    }
+                }
+            }
+            if (v1 == stationEnd) break; // Termina o segmento quando atinge a estação final
+        }
+
+        segmentDistances.push_back(segmentCost); // Adiciona o custo do segmento
+    }
+    
+    return {path, segmentDistances, stations}; // Retorna o caminho, os custos e as estações
 }

@@ -10,7 +10,7 @@
 using namespace std;
 
 int main() {
-    string jsonFilePath = "city_graph.json";
+    string jsonFilePath = "city_graph_3_estacoes.json";
 
     vector<Vertex*> vertices;
     vector<Edge*> edges;
@@ -117,7 +117,7 @@ int main() {
     pair<vector<Edge*>, int> teste; 
     
     Vertex* comeco = vertices[0];
-    Vertex* fim = vertices[200];
+    Vertex* fim = vertices[35];
     teste = dijkstraFoot(comeco,  fim, adjacencyList);
     
     auto& edgesDijkstra =  get<0>(teste);
@@ -136,6 +136,20 @@ int main() {
     
     printDirectedAdjacencyList(mstadj);
     
+    //Teste caminho entre estações
+    
+    auto [path, segmentDistances, stations] = findPathBetweenStation(mstadj, 558331, 833775);
+
+    // Imprimindo os resultados
+    cout << " path (ids dos vértices):" << endl;
+    for (int v : path) cout << v << " "; // Caminho completo
+    cout << "\n custo entre estações:" << endl;
+    for (int d : segmentDistances) cout << d << " "; // Custos entre estações
+    cout << "\n estações do caminho (ids dos vértices):" << endl;
+    for (int s : stations) cout << s << " "; // Estações relevantes
+    cout << "\n ok" << endl;
+    
+    ////////////////////////////////////////////////////////////////////////////
     
     //TESTE Melhor Caminho (carro ou táxi)
     

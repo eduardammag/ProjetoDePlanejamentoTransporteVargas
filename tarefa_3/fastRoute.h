@@ -28,5 +28,12 @@ bool isTheSameRegion(const Edge* edge1, const Edge* edge2);
 vector<Edge*> findBestPath(pair<Edge*, Vertex*> start, pair<Edge*, Vertex*> destination, 
                            const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
                            const vector<vector<tuple<int, Edge*>>>& directedAdj, float budget);
+                           
+
+tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
+    const vector<vector<tuple<int, Edge*>>>& mstadj, // Lista de adjacência da MST
+    int region1CEP, // CEP da região 1
+    int region2CEP // CEP da região 2
+);
 
 #endif
