@@ -56,7 +56,7 @@ int Edge::distance() const {
 }
 
 // Getter: Retorna o código postal associado à aresta.
-int Edge::id_zipCode() {
+int Edge::id_zipCode() const {
     return m_zipCode;
 }
 

@@ -74,7 +74,7 @@ pair<vector<Edge*>, int> dijkstraFoot(Vertex* start,  Vertex* destination, const
 }
 
 // Função para encontrar a aresta correspondente a um número de imóvel em uma rua.
-Edge* findEdgeAddress(int street, int id_zipCode, int number_build, const vector<Edge*>& edges) {
+pair<Edge*, Vertex*> findEdgeAddress(int street, int id_zipCode, int number_build, const vector<Edge*>& edges) {
     int current_distance = 0; // Distância acumulada ao longo da rua.
 
     // Ordena as arestas para garantir a sequência crescente dos IDs dos vértices.
@@ -93,49 +93,31 @@ Edge* findEdgeAddress(int street, int id_zipCode, int number_build, const vector
             int start_number = current_distance + 1;
             int end_number = current_distance + edge->distance();
     
-            // cout << "Aresta encontrada: Vértices (" << id_start << ", " << id_end << ")" << endl;
-            // cout << "Intervalo de números na aresta: [" << start_number << ", " << end_number << "]" << endl;
-    
+            // Verifica se o número do imóvel está no intervalo desta aresta
             if (number_build >= start_number && number_build <= end_number) {
-                // cout << "Número do imóvel encontrado nesta aresta!" << endl;
-                return edge;
+                // Calcula a posição relativa do número do imóvel na aresta
+                int relative_position = number_build - start_number;
+                int middle_point = edge->distance() / 2;
+                
+                Vertex* closest_vertex;
+                if (relative_position <= middle_point)
+                {
+                    closest_vertex = edge->vertex1();
+                }
+                else
+                {
+                    closest_vertex = edge->vertex2();
+                }
+                
+                return {edge, closest_vertex};
             }
     
             current_distance = end_number; // Atualiza a distância acumulada.
-        } else {
-            // cout << "Aresta ignorada: não corresponde à rua ou ao CEP." << endl;
         }
     }
 
-
-    return nullptr; // Retorna nullptr caso nenhuma aresta seja encontrada.
+    return {nullptr, nullptr}; // Retorna nullptr caso nenhuma aresta seja encontrada.
 }
-
-
-// findSameRigion( ){
-//     vai o maximo de taxi dentro do orçamento e o resto a  pe de graça
-//     ou só a pé
-// }
-
-// vector<tuple<str, Edge*>> findFastRoute( int street, int id_zipCode, int number_build, int max_cost, int hour){
-//     taxi completo = preço tempo usando dijkstra direcionado transito*velocidade
-//     a pé = 0 reais tempo grafo não direcionado velocidade constante
-//     se custo< max_custo : break;
-
-//     testa para a estação da mesma região, qual o mais rápido: taxi  ou a pé
-//     Se no final ultrapassar o orçamento, tentamos a péaté a primeira
-//         testa até a primeira estação no caminho para maximo de metro, a estação da região do destino:
-//             Testa taxi e a pé, qual o mais rápido
-
-//         Testa mais uma:
-//             Testa taxi e a pé, qual o mais rapido para o destino final dentro do orçamento
-//             Se o taxi não está no orçamento e a pé é mais devagar que taxi, e tiver outro metro, testa o metro para a próxima 
-
-//         no maximo de metro, a estação da região do destino
-//         se está na mesma região, não vai usar metrô
-
-
-// }
 
 // Função que calcula o menor caminho e custo usando Dijkstra para um táxi
 tuple<float, float, vector<Edge*>> dijkstraTaxi(
@@ -144,8 +126,8 @@ tuple<float, float, vector<Edge*>> dijkstraTaxi(
     int destination // Vértice de destino
 ) {
     // Parâmetros relacionados ao táxi
-    float taxiRatePerMeter = 0.5f;  // Tarifa do táxi por metro percorrido
-    float maxSpeedKmH = 60.0f;      // Velocidade máxima permitida (em km/h)
+    float taxiRatePerMeter = 0.01f;  // Tarifa do táxi por metro percorrido
+    float maxSpeedKmH = 30.0f;      // Velocidade máxima permitida (em km/h)
 
     // Número de vértices no grafo
     int n = directedAdj.size();
@@ -219,4 +201,37 @@ tuple<float, float, vector<Edge*>> dijkstraTaxi(
 
     // Retorna o custo total, tempo total e as arestas percorridas
     return {totalCost[destination], minTime[destination], edges};
+}
+
+//Função para verificar se a aresta destino está na mesma região que a aresta inicial
+bool isTheSameRegion(const Edge* edge1, const Edge* edge2) {
+    return edge1->id_zipCode() == edge2->id_zipCode();
+}
+
+//Função para verificar o melhor caminho entre dois vértices (de táxi ou a pé), considerando o orçamento
+vector<Edge*> findBestPath(pair<Edge*, Vertex*> start, pair<Edge*, Vertex*> destination, 
+                           const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
+                           const vector<vector<tuple<int, Edge*>>>& directedAdj, float budget) 
+{
+    Edge* startEdge = start.first;
+    Vertex* startVertex = start.second;
+    Vertex* destinationVertex = destination.second;
+
+    // Caminho de carro usando Dijkstra
+    auto [carCost, carTime, carPath] = dijkstraTaxi(directedAdj, startVertex->id(), destinationVertex->id());
+    
+    if (carCost <= budget) {
+        cout << "Recomendado ir de carro, custo: R$ " << carCost << ", tempo: " << carTime << " minutos." << endl;
+        return carPath;
+    }
+
+    // Caminho a pé usando Dijkstra
+    auto [footPath, footTime] = dijkstraFoot(startVertex, destinationVertex, adjacencyList);
+    if (!footPath.empty() && footTime < carTime) {
+        cout << "Recomendado ir a pé, tempo: " << footTime << " minutos." << endl;
+        return footPath;
+    }
+
+    cout << "Nenhum caminho a pé mais rápido que o de carro foi encontrado, mas o custo de carro excede o orçamento." << endl;
+    return {};
 }

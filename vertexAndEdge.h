@@ -63,7 +63,7 @@ public:
     int idEdge() const;
 
     // Getter: Retorna o código postal associado à aresta.
-    int id_zipCode();
+    int id_zipCode() const;
 };
 
 #endif

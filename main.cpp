@@ -22,14 +22,8 @@ int main() {
         return 1;
     }
 
-    // Matrizes e listas
-    vector<vector<Edge*>> adjacencyMatrix;
-    vector<vector<tuple<int, Edge*>>> adjacencyList;
-
-    // Gera a matriz de adjacência
-    generateAdjacencyMatrix(vertices, edges, adjacencyMatrix);
-
     // Gera a lista de adjacência
+    vector<vector<tuple<int, Edge*>>> adjacencyList;
     generateAdjacencyList(vertices, edges, adjacencyList);
 
     unordered_map<int, vector<Edge*>> edgesByCepMap;
@@ -105,15 +99,15 @@ int main() {
     int id_zipCode = 833775; // CEP da rua
     int number_build = 3; // Número do imóvel
 
-    Edge* foundEdge = findEdgeAddress(street, id_zipCode, number_build, edges);
+    pair<Edge*, Vertex*> foundEdge = findEdgeAddress(street, id_zipCode, number_build, edges);
 
     // Resultado do teste.
-    if (foundEdge) {
+    if (foundEdge.first != nullptr && foundEdge.second != nullptr) {
         cout << "Aresta encontrada!" << endl;
-        cout << "Rua ID: " << foundEdge->id_street()
-             << ", Distância: " << foundEdge->distance()
-             << ", Vértices: (" << foundEdge->vertex1()->id()
-             << ", " << foundEdge->vertex2()->id() << ")" << endl;
+        cout << "Rua ID: " << foundEdge.first->id_street()
+             << ", Distância: " << foundEdge.first->distance()
+             << ", Vértices: (" << foundEdge.first->vertex1()->id()
+             << ", " << foundEdge.first->vertex2()->id() << ")" << endl;
     } else {
         cout << "Nenhuma aresta encontrada para o número de imóvel informado." << endl;
     }
@@ -141,6 +135,43 @@ int main() {
     cout << "processou" << endl;
     
     printDirectedAdjacencyList(mstadj);
+    
+    
+    //TESTE Melhor Caminho (carro ou táxi)
+    
+    vector<vector<tuple<int, Edge*>>> directedAdj;
+    directedAdj = adjacencyList;
+    convertToDirected(directedAdj);
+
+    // Definindo vértices e arestas de início e destino
+    Vertex* startVertex = vertices[0];
+    Vertex* destinationVertex = vertices.back();
+    Edge* startEdge = edges[0];
+    Edge* destinationEdge = edges.back();
+
+    pair<Edge*, Vertex*> start = {startEdge, startVertex};
+    pair<Edge*, Vertex*> destination = {destinationEdge, destinationVertex};
+
+    // Definição de orçamento máximo
+    float budget = 50.0f;
+    
+    cout << "\n" <<endl;
+    
+    // Encontrar melhor caminho
+    vector<Edge*> bestPath = findBestPath(start, destination, adjacencyList, directedAdj, budget);
+    if (!bestPath.empty()) {
+        cout << "Caminho recomendado (IDs das arestas): ";
+        for (Edge* edge : bestPath) {
+            cout << edge->idEdge() << " ";
+        }
+        cout << endl;
+    } else {
+        cout << "Nenhum caminho viável foi encontrado." << endl;
+    }
+
+    // Limpeza da memória alocada
+    for (Vertex* vertex : vertices) delete vertex;
+    for (Edge* edge : edges) delete edge;
 
     return 0;
 }
