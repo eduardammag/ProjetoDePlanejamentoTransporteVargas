@@ -64,21 +64,7 @@ int main() {
         }
     }
     
-    // // Gerar os caminhos otimizados
-    // vector<vector<Edge*>> detailedPaths;
 
-    // // Calcular a Árvore de Steiner
-    // vector<Edge*> steinerEdges = conect_metro(vertices, adjacencyList, optimalVertices, detailedPaths);
-    
-    // // Exibe as rotas 
-    // printBestRoutes(steinerEdges, detailedPaths);
-    
-    // int custo;
-    // custo = totalCostSubway(steinerEdges, detailedPaths);
-    
-    // cout << "Custo total: " << custo << endl;
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Criação de vértices (representando cruzamentos ou pontos importantes).
     Vertex* v1 = new Vertex(false, 1); // ID: 1
     Vertex* v2 = new Vertex(false, 2); // ID: 2
@@ -151,7 +137,7 @@ int main() {
     
     ////////////////////////////////////////////////////////////////////////////
     
-    //TESTE Melhor Caminho (carro ou táxi)
+    //teste melhor Caminho (carro ou táxi)
     
     vector<vector<tuple<int, Edge*>>> directedAdj;
     directedAdj = adjacencyList;
