@@ -6,11 +6,12 @@
 #include "fastRoute.h"
 #include <unordered_set>
 #include <vector>
+#include <string>
 
 using namespace std;
 
 int main() {
-    string jsonFilePath = "city_graph_3_estacoes.json";
+    string jsonFilePath = "city_graph.json";
 
     vector<Vertex*> vertices;
     vector<Edge*> edges;
@@ -64,7 +65,21 @@ int main() {
         }
     }
     
+    // // Gerar os caminhos otimizados
+    // vector<vector<Edge*>> detailedPaths;
 
+    // // Calcular a Árvore de Steiner
+    // vector<Edge*> steinerEdges = conect_metro(vertices, adjacencyList, optimalVertices, detailedPaths);
+    
+    // // Exibe as rotas 
+    // printBestRoutes(steinerEdges, detailedPaths);
+    
+    // int custo;
+    // custo = totalCostSubway(steinerEdges, detailedPaths);
+    
+    // cout << "Custo total: " << custo << endl;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Criação de vértices (representando cruzamentos ou pontos importantes).
     Vertex* v1 = new Vertex(false, 1); // ID: 1
     Vertex* v2 = new Vertex(false, 2); // ID: 2
@@ -82,7 +97,7 @@ int main() {
 
     // Teste: Encontrar uma aresta correspondente a um número de imóvel.
     int street = 3564;       // ID da rua
-    int id_zipCode = 833775; // CEP da rua
+    int id_zipCode = 213493; // CEP da rua
     int number_build = 3; // Número do imóvel
 
     pair<Edge*, Vertex*> foundEdge = findEdgeAddress(street, id_zipCode, number_build, edges);
@@ -124,20 +139,20 @@ int main() {
     
     //Teste caminho entre estações
     
-    auto [path, segmentDistances, stations] = findPathBetweenStation(mstadj, 558331, 833775);
+    // auto [path, segmentDistances, stations] = findPathBetweenStation(mstadj, 558331, 833775);
 
-    // Imprimindo os resultados
-    cout << " path (ids dos vértices):" << endl;
-    for (int v : path) cout << v << " "; // Caminho completo
-    cout << "\n custo entre estações:" << endl;
-    for (int d : segmentDistances) cout << d << " "; // Custos entre estações
-    cout << "\n estações do caminho (ids dos vértices):" << endl;
-    for (int s : stations) cout << s << " "; // Estações relevantes
-    cout << "\n ok" << endl;
+    // // Imprimindo os resultados
+    // cout << " path (ids dos vértices):" << endl;
+    // for (int v : path) cout << v << " "; // Caminho completo
+    // cout << "\n custo entre estações:" << endl;
+    // for (int d : segmentDistances) cout << d << " "; // Custos entre estações
+    // cout << "\n estações do caminho (ids dos vértices):" << endl;
+    // for (int s : stations) cout << s << " "; // Estações relevantes
+    // cout << "\n ok" << endl;
     
     ////////////////////////////////////////////////////////////////////////////
     
-    //teste melhor Caminho (carro ou táxi)
+    //TESTE Melhor Caminho (carro ou táxi)
     
     vector<vector<tuple<int, Edge*>>> directedAdj;
     directedAdj = adjacencyList;
@@ -149,8 +164,8 @@ int main() {
     Edge* startEdge = edges[0];
     Edge* destinationEdge = edges.back();
 
-    pair<Edge*, Vertex*> start = {startEdge, startVertex};
-    pair<Edge*, Vertex*> destination = {destinationEdge, destinationVertex};
+    // pair<Edge*, Vertex*> start = {startEdge, startVertex};
+    // pair<Edge*, Vertex*> destination = {destinationEdge, destinationVertex};
 
     // Definição de orçamento máximo
     float budget = 50.0f;
@@ -158,20 +173,42 @@ int main() {
     cout << "\n" <<endl;
     
     // Encontrar melhor caminho
-    vector<Edge*> bestPath = findBestPath(start, destination, adjacencyList, directedAdj, budget);
-    if (!bestPath.empty()) {
+    tuple<vector<Edge*>, float, int, string> bestPath = findBestPath(startVertex, destinationVertex, adjacencyList, directedAdj, budget);
+    if (!get<0>(bestPath).empty()) {
         cout << "Caminho recomendado (IDs das arestas): ";
-        for (Edge* edge : bestPath) {
+        for (Edge* edge : get<0>(bestPath)) {
             cout << edge->idEdge() << " ";
         }
         cout << endl;
     } else {
         cout << "Nenhum caminho viável foi encontrado." << endl;
     }
+    
+    // for (Edge* edge: edges)
+    // {
+    //     cout << edge->idEdge() << endl;
+    // }
+    tuple<vector<pair<Edge*, string>>, int, float> testefinal;
+    Edge* destEdge = edges[0];
+    Edge* estatEdge = edges[250];
+    cout << estatEdge->id_zipCode() << " " << destEdge->id_zipCode() << endl;
+    cout << "A aresta existe" << endl;
+    cout << "Vertex válido" << estatEdge->idEdge() <<  endl; 
+    
+    testefinal =  fastestRoute(estatEdge->vertex1(), destEdge->vertex1(), estatEdge,destEdge, 317, 0, adjacencyList, directedAdj, mstadj);
+    vector<pair<Edge*, string>> patheste = get<0>(testefinal);
+    for (auto [edge, locomation]: patheste)
+    {
+        cout << locomation << endl;
+    }
+    // cout << get<2>(testefinal)
+    cout << get<2>(testefinal) << endl;
+    
+    cout << "processou" << endl;
 
     // Limpeza da memória alocada
     for (Vertex* vertex : vertices) delete vertex;
     for (Edge* edge : edges) delete edge;
-
+    
     return 0;
 }
