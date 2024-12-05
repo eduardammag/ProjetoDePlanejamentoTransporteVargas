@@ -65,20 +65,6 @@ int main() {
         }
     }
     
-    // // Gerar os caminhos otimizados
-    // vector<vector<Edge*>> detailedPaths;
-
-    // // Calcular a Árvore de Steiner
-    // vector<Edge*> steinerEdges = conect_metro(vertices, adjacencyList, optimalVertices, detailedPaths);
-    
-    // // Exibe as rotas 
-    // printBestRoutes(steinerEdges, detailedPaths);
-    
-    // int custo;
-    // custo = totalCostSubway(steinerEdges, detailedPaths);
-    
-    // cout << "Custo total: " << custo << endl;
-
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // Criação de vértices (representando cruzamentos ou pontos importantes).
     Vertex* v1 = new Vertex(false, 1); // ID: 1
@@ -137,21 +123,7 @@ int main() {
     
     printDirectedAdjacencyList(mstadj);
     
-    //Teste caminho entre estações
-    
-    // auto [path, segmentDistances, stations] = findPathBetweenStation(mstadj, 558331, 833775);
-
-    // // Imprimindo os resultados
-    // cout << " path (ids dos vértices):" << endl;
-    // for (int v : path) cout << v << " "; // Caminho completo
-    // cout << "\n custo entre estações:" << endl;
-    // for (int d : segmentDistances) cout << d << " "; // Custos entre estações
-    // cout << "\n estações do caminho (ids dos vértices):" << endl;
-    // for (int s : stations) cout << s << " "; // Estações relevantes
-    // cout << "\n ok" << endl;
-    
-    ////////////////////////////////////////////////////////////////////////////
-    
+  
     //TESTE Melhor Caminho (carro ou táxi)
     
     vector<vector<tuple<int, Edge*>>> directedAdj;
@@ -164,8 +136,6 @@ int main() {
     Edge* startEdge = edges[0];
     Edge* destinationEdge = edges.back();
 
-    // pair<Edge*, Vertex*> start = {startEdge, startVertex};
-    // pair<Edge*, Vertex*> destination = {destinationEdge, destinationVertex};
 
     // Definição de orçamento máximo
     float budget = 50.0f;
@@ -183,11 +153,8 @@ int main() {
     } else {
         cout << "Nenhum caminho viável foi encontrado." << endl;
     }
-    
-    // for (Edge* edge: edges)
-    // {
-    //     cout << edge->idEdge() << endl;
-    // }
+
+
     tuple<vector<pair<Edge*, string>>, int, float> testefinal;
     Edge* destEdge = edges[0];
     Edge* estatEdge = edges[250];
