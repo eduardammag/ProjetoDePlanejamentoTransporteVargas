@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <string>
 #include "vertexAndEdge.h"
 #include "fastRoute.h"
 
@@ -25,15 +26,22 @@ tuple<float, float, vector<Edge*>> dijkstraTaxi(
 bool isTheSameRegion(const Edge* edge1, const Edge* edge2);
 
 //Função para verificar o melhor caminho entre dois vértices (de táxi ou a pé), considerando o orçamento
-vector<Edge*> findBestPath(pair<Edge*, Vertex*> start, pair<Edge*, Vertex*> destination, 
+tuple<vector<Edge*>, float, int, string> findBestPath(Vertex* start, Vertex* destination, 
                            const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
                            const vector<vector<tuple<int, Edge*>>>& directedAdj, float budget);
                            
 
-tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
+tuple<vector<pair<int, Edge*>>, vector<int>, vector<int>> findPathBetweenStation(
     const vector<vector<tuple<int, Edge*>>>& mstadj, // Lista de adjacência da MST
     int region1CEP, // CEP da região 1
     int region2CEP // CEP da região 2
 );
+
+// Função principal que calcula a rota mais rápida
+tuple<vector<pair<Edge*, string>>, int, float> fastestRoute(Vertex* startVertex, Vertex* destinationVertex, 
+                                    Edge* startEdge, Edge* destEdge, int hour, float budget, 
+                                    const vector<vector<tuple<int, Edge*>>>&adjList, 
+                                    const vector<vector<tuple<int, Edge*>>>&dirAdjList, 
+                                    const vector<vector<tuple<int, Edge*>>>& mstadj);
 
 #endif

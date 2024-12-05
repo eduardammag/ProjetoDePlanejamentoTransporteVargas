@@ -3,20 +3,14 @@
 #include <iostream> 
 #include <stack>
 #include <queue>
-#include <iostream>
 #include <cfloat>
-#include <vector>
-#include <tuple>
 #include <unordered_set>
-#include <unordered_map>
-#include <algorithm>
-#include <stdexcept>
-#include <functional>
+#include <string>
 
 
 using namespace std; 
 
-// Implementação da função cptDijkstraFast
+// Calculando o melhor caminho a pé 
 pair<vector<Edge*>, int> dijkstraFoot(Vertex* start,  Vertex* destination, const vector<vector<tuple<int, Edge*>>> adjacencyList) 
 {
     // inicializa as estruturas auxilares
@@ -218,43 +212,43 @@ bool isTheSameRegion(const Edge* edge1, const Edge* edge2) {
 }
 
 //Função para verificar o melhor caminho entre dois vértices (de táxi ou a pé), considerando o orçamento
-vector<Edge*> findBestPath(pair<Edge*, Vertex*> start, pair<Edge*, Vertex*> destination, 
+tuple<vector<Edge*>, float, int, string> findBestPath(Vertex* start, Vertex* destination, 
                            const vector<vector<tuple<int, Edge*>>>& adjacencyList, 
                            const vector<vector<tuple<int, Edge*>>>& directedAdj, float budget) 
 {
-    Edge* startEdge = start.first;
-    Vertex* startVertex = start.second;
-    Vertex* destinationVertex = destination.second;
+    // Edge* startEdge = start.first;
+    Vertex* startVertex = start;
+    Vertex* destinationVertex = destination;
 
     // Caminho de carro usando Dijkstra
     auto [carCost, carTime, carPath] = dijkstraTaxi(directedAdj, startVertex->id(), destinationVertex->id());
     
     if (carCost <= budget) {
         cout << "Recomendado ir de carro, custo: R$ " << carCost << ", tempo: " << carTime << " minutos." << endl;
-        return carPath;
+        return {carPath, carCost, carTime, "cab"};
     }
 
     // Caminho a pé usando Dijkstra
     auto [footPath, footTime] = dijkstraFoot(startVertex, destinationVertex, adjacencyList);
     if (!footPath.empty() && footTime < carTime) {
         cout << "Recomendado ir a pé, tempo: " << footTime << " minutos." << endl;
-        return footPath;
+        return {footPath, 0, footTime, "foot"};
     }
 
     cout << "Nenhum caminho a pé mais rápido que o de carro foi encontrado, mas o custo de carro excede o orçamento." << endl;
-    return {};
+    return {{},0,0, "nulo"};
 }
 
 
 //Função que encontra o caminho entre as estações de duas regiões específicas e 
 // retorna a tupla contendo IDs de vértices no caminho, os custos entre vértices, 
 // Vetor com os IDs dos vértices das estações do caminho
-tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
+tuple<vector<pair<int, Edge*>>, vector<int>, vector<int>> findPathBetweenStation(
     const vector<vector<tuple<int, Edge*>>>& mstadj, // Lista de adjacência da MST
     int region1CEP, // CEP da região 1
     int region2CEP // CEP da região 2
 ) {
-    vector<int> path; // Caminho completo (vértices visitados)
+    vector<pair<int, Edge*>> path;// Caminho completo (vértices visitados)
     vector<int> segmentDistances; // Custos entre estações de metrô
     vector<int> stations; // Apenas estações de metrô no caminho
 
@@ -290,7 +284,7 @@ tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
     }
 
     // Busca em profundidade (DFS) para encontrar o caminho
-    unordered_map<int, int> parent; // Para reconstruir o caminho
+     vector<pair<int, Edge*>> parent(mstadj.size(), {-1, nullptr}); // Para reconstruir o caminho
     unordered_set<int> visited; // Conjunto para marcar vértices visitados
 
     // Função auxiliar para DFS
@@ -301,7 +295,7 @@ tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
 
         for (const auto& [neighbor, edge] : mstadj[current]) {
             if (!visited.count(neighbor)) { // Se o vizinho ainda não foi visitado
-                parent[neighbor] = current; // Define o pai do vizinho como o vértice atual
+                parent[neighbor] = {current, edge}; // Define o pai do vizinho como o vértice atual
                 if (dfs(neighbor)) return true; // Continua a busca recursiva
             }
         }
@@ -309,7 +303,8 @@ tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
     };
 
     // Inicializa a DFS a partir da estação inicial
-    parent[station1->id()] = -1; // A estação inicial não tem pai
+    // parent[station1->id()] = {-1, nullptr};
+    parent[station1->id()] = {-1, nullptr}; // A estação inicial não tem pai
     if (!dfs(station1->id())) {
         throw runtime_error("Não foi possível encontrar um caminho entre as estações fornecidas.");
     }
@@ -317,13 +312,14 @@ tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
     // Reconstrói o caminho a partir do mapa de pais
     int current = station2->id();
     while (current != -1) {
-        path.push_back(current);
-        current = parent[current];
+        path.push_back(parent[current]);
+        current = parent[current].first;
     }
     reverse(path.begin(), path.end()); // Reverte o caminho para a ordem correta
 
     // Filtra apenas as estações de metrô no caminho
-    for (int vertex : path) {
+    for (auto vertexPath : path) {
+        int vertex  = get<0>(vertexPath);
         for (const auto& [neighbor, edge] : mstadj[vertex]) {
             if ((edge->vertex1()->id() == vertex && edge->vertex1()->isMetroStation()) ||
                 (edge->vertex2()->id() == vertex && edge->vertex2()->isMetroStation())) {
@@ -341,25 +337,183 @@ tuple<vector<int>, vector<int>, vector<int>> findPathBetweenStation(
         int stationEnd = stations[i];
         int segmentCost = 0;
 
-        // Calcula o custo do subcaminho entre estações consecutivas
-        for (size_t j = 1; j < path.size(); ++j) {
-            int v1 = path[j - 1];
-            int v2 = path[j];
-
-            // Adiciona os custos ao segmento enquanto estiver dentro das duas estações
-            if ((v1 == stationStart || v1 == stationEnd) || segmentCost > 0) {
-                for (const auto& [neighbor, edge] : mstadj[v1]) {
-                    if (neighbor == v2) {
-                        segmentCost += edge->distance();
-                        break;
-                    }
-                }
+        for (const auto& [vertex, edge] : path) {
+            if (edge && (vertex == stationStart || vertex == stationEnd || segmentCost > 0)) {
+                segmentCost += edge->distance();
             }
-            if (v1 == stationEnd) break; // Termina o segmento quando atinge a estação final
+            if (vertex == stationEnd) break;
+        }
+        segmentDistances.push_back(segmentCost);
+    }
+
+    return {path, segmentDistances, stations};
+}
+
+
+tuple<vector<pair<Edge*, string>>, int, float> fastestRoute(Vertex* startVertex, Vertex* destinationVertex, 
+                    Edge* startEdge, Edge* destEdge, int hour, float budget, 
+                    const vector<vector<tuple<int, Edge*>>>&adjList, 
+                    const vector<vector<tuple<int, Edge*>>>&dirAdjList, 
+                    const vector<vector<tuple<int, Edge*>>>& mstadj)
+{
+    cout << "Entrei " << endl;
+    // Preço para pegar o metro 
+    int subwayTicket = 10;
+    int duration = 0;
+    // Percurso e locomoção percorrida a cada aresta
+    vector<pair<Edge*, string>> route;
+    // Analisando se conseguimos pagar todo o percurso de táxi ou
+    // se estamos tão próximo que é melhor ir de a pé
+    auto [wholePath, wholeCost, wholeTime, locomation] = findBestPath( startVertex, destinationVertex, adjList, dirAdjList, budget);
+
+    // Se achou uma locomoção válida
+    if (!wholePath.empty())
+    {
+        budget -= wholeCost;
+        for (Edge* edge: wholePath)
+        {
+            // Cada aresta é associada ao meio de locomoção
+            route.push_back({edge, locomation});
+        }
+        return {route, wholeTime, budget};
+    }
+
+    // Se estivemors na mesma região então não devemos considerar o metrô
+    // e como não temos orçamento para táxi deve-se ir de a pé
+    // ou se não tivermos orçamento nem para metrô
+    if (isTheSameRegion(startEdge, destEdge) || budget < subwayTicket)
+    {
+        auto [footPath, footTime] = dijkstraFoot(startVertex, destinationVertex, adjList);
+        for (Edge* edge: footPath)
+        {
+            route.push_back({edge, "foot"});
+        }
+        return {route, footTime, budget};
+    }
+
+    // Pega o metro
+    budget -= subwayTicket;
+
+    // Indo ao metro da mesmo região 
+    auto [path, segmentDistances, stations] = findPathBetweenStation(mstadj, startEdge->id_zipCode(), destEdge->id_zipCode());
+
+    Vertex*  regionSubway =  new Vertex(true, stations[0]);
+
+    // Verificando se tem orçamento para ir até o metrô de táxi
+    auto [carCost, carTime, carPath] = dijkstraTaxi(dirAdjList, startVertex->id(), regionSubway->id());
+    if (budget - carCost >= 0)
+    {
+        duration += carTime;
+        budget -= carCost;
+        for (Edge* edge: carPath)
+        {
+            route.push_back({edge, "cab"});
+        }
+    }
+    // Vai de a pé até a estaçõ da região
+    else
+    {
+        auto [footPath, footTime] = dijkstraFoot(startVertex, regionSubway, adjList);
+        duration += footTime;
+        for (Edge* edge: footPath)
+        {
+            route.push_back({edge, "foot"});
+        }
+    }
+
+    // Agora chegou na primeira estação para pegar o metro 
+    // Trens só chegam em horários divisíveis por 20
+    int waiting = (hour + duration) % 20;
+    duration += waiting;
+    int stationsLeft = stations.size() - 1;
+    int currentStation = 0;
+
+    // Velocidade do metrô em metros por minuto
+    double speed = 1166.67;
+    tuple<vector<Edge*>, float, int, string> result;
+    vector<Edge*>leftPath;
+    float leftCost;
+    int leftTime;
+    string leftLocomation;
+    Vertex* currStatVertex = new Vertex(true, stations[currentStation]);
+    
+    while (stationsLeft)
+    {
+        // Vou para próxima estação
+        int distanceBetween = segmentDistances[currentStation];
+        // Distancia entre estações dividido pela velocidade
+        int subwayDuration = distanceBetween / speed;
+        duration += subwayDuration;
+
+        currentStation+=1;
+        stationsLeft -=1;
+        Vertex* currStatVertex = new Vertex(true, stations[currentStation]);
+
+        // Verifico se consigo ir de táxi a partir de agora até o destino
+        // ou pode ir de a pé se for mais rápido
+        result = findBestPath(currStatVertex, destinationVertex, adjList, dirAdjList, budget);
+        leftPath = std::get<0>(result);
+        leftCost = std::get<1>(result);
+        leftTime = std::get<2>(result);
+        leftLocomation = std::get<3>(result);
+        
+        int startPath = stations.size() - stationsLeft - 2;
+        int stopPath = stations.size() - stationsLeft - 1;
+        for (int i = startPath; i< stopPath; i++)
+        {
+            auto vertexAndEdge = path[i];
+            Edge* edge = get<1>(vertexAndEdge);
+            route.push_back({edge, "subway"});
+        }
+        
+        
+
+        // Se achou uma locomoção válida
+        if (!leftPath.empty())
+        {
+            duration += leftTime;
+            budget -= leftCost;
+            for (Edge* edge: leftPath)
+            {
+                // Cada aresta associada ao meio de locomoção
+                route.push_back({edge, locomation});
+            }
+            return {route, duration, budget};
         }
 
-        segmentDistances.push_back(segmentCost); // Adiciona o custo do segmento
+        // Ainda não compensa ou não conseguimos ir de táxi 
+        // se restar estações continua até a linha de metro acabar
     }
+
+    // Chegou até a estação da região do destino, acabou o metro disponível
+    //  Verificamos qual é melhor dentro do orçamento 
+
     
-    return {path, segmentDistances, stations}; // Retorna o caminho, os custos e as estações
+    result = findBestPath(currStatVertex, destinationVertex, adjList, dirAdjList, budget);
+    leftPath = std::get<0>(result);
+    leftCost = std::get<1>(result);
+    leftTime = std::get<2>(result);
+    leftLocomation = std::get<3>(result);
+    // Se achou uma locomoção válida
+    if (!leftPath.empty())
+    {
+        duration += leftTime;
+        budget -= leftCost;
+        for (Edge* edge: leftPath)
+        {
+            // Cada aresta associada ao meio de locomoção
+            route.push_back({edge, locomation});
+
+        }
+        return {route, duration, budget};
+    }
+    // Se não achou nenhuma válida nos resta andar até o destino
+    auto [footPath, footTime] = dijkstraFoot(currStatVertex, destinationVertex, adjList);
+    duration += footTime;
+    for (Edge* edge: footPath)
+    {
+        route.push_back({edge, "foot"});
+    }
+
+    return {route, duration, budget};
 }
