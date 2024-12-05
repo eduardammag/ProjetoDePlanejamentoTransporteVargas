@@ -1,92 +1,114 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
-#include <string>
-#include <chrono>
+#include <tuple>
 #include <unordered_map>
-#include <unordered_set>
-#include <queue>
-#include <stdexcept>
+#include <chrono>
 #include "buildGraph.h"
 #include "findStation.h"
 #include "vertexAndEdge.h"
 
 using namespace std;
+using namespace std::chrono;
 
-// Função para medir o tempo de execução para uma região específica
-double measureTime(int regionCode, const vector<Edge*>& edges, const vector<Vertex*>& vertices) {
-    auto start = chrono::high_resolution_clock::now();
+void testPerformance() {
+    vector<int> gridSizes = {10, 20, 30, 40}; // Tamanhos da grid
+    string filePrefix = "city_graph_";           // Prefixo do nome dos arquivos
+    string fileSuffix = ".json";                 // Sufixo do nome dos arquivos
 
-    vector<Edge*> regionEdges;
-    vector<vector<Edge*>> regionVertices; // Alterado para o tipo esperado pela função
-    vector<vector<tuple<int, Edge*>>> adjacencyList;
-
-    // Filtrar arestas pelo regionCode
-    for (const auto& edge : edges) {
-        if (edge->id_zipCode() == regionCode) {
-            regionEdges.push_back(edge);
-        }
+    // Abre o arquivo para salvar os tempos de execução
+    ofstream outputFile("execution_times.txt");
+    if (!outputFile.is_open()) {
+        cerr << "Erro ao abrir o arquivo para salvar os tempos de execução!" << endl;
+        return;
     }
 
-    // Adiciona regionEdges como a única região na lista
-    regionVertices.push_back(regionEdges);
+    for (int size : gridSizes) {
+        string fileName = filePrefix + to_string(size) + "x" + to_string(size) + fileSuffix;
 
-    // Gerar a lista de adjacência usando apenas as arestas da região
-    generateAdjacencyList(vertices, regionEdges, adjacencyList);
+        // Verifica se o arquivo existe antes de processar
+        ifstream testFile(fileName);
+        if (!testFile.is_open()) {
+            cerr << "Erro ao abrir o arquivo JSON: " << fileName << endl;
+            outputFile << "Erro ao abrir o arquivo JSON: " << fileName << endl;
+            continue;
+        }
+        testFile.close();
 
-    // Chamada da função usando o novo formato
-    Vertex* optimalVertex = findOptimalVertexFast(regionVertices, adjacencyList);
+        cout << "Testando arquivo: " << fileName << endl;
+        // outputFile << "Testando arquivo: " << fileName << endl;
 
-    if (optimalVertex) {
-        cout << "Vértice ótimo para a região " << regionCode << " = " << optimalVertex->id() << endl;
-    } else {
-        cout << "Nenhum vértice ótimo encontrado.\n";
-    }
+        vector<Vertex*> vertices;
+        vector<Edge*> edges;
 
-    auto end = chrono::high_resolution_clock::now();
-    chrono::duration<double> duration = end - start;
-
-    return duration.count();
-}
-
-int main() {
-    // Suponha que você já tenha os caminhos dos arquivos JSON
-    vector<Vertex*> vertices;
-    vector<Edge*> edges;
-
-    try {
-        // Carregar dados de arquivo JSON
-        vector<string> filePaths = {"city_graph_30x30.json"};
-        
-        // Carrega os grafos a partir dos arquivos JSON
-        for (const auto& filePath : filePaths) 
-        {
-            parseJsonFile(filePath, vertices, edges);
+        try {
+            parseJsonFile(fileName, vertices, edges);
+        } catch (const exception& e) {
+            cerr << "Erro ao processar o arquivo " << fileName << ": " << e.what() << endl;
+            // outputFile << "Erro ao processar o arquivo " << fileName << ": " << e.what() << endl;
+            continue;
         }
 
-        // Processar para todas as regiões
-        for (const auto& filePath : filePaths) {
-            // Exemplo para extrair o número de regiões
-            string filename = filePath.substr(filePath.find_last_of("/\\") + 1);
-            int n = stoi(filename.substr(filename.find("city_graph_") + 11, filename.find("x") - 11));
-            int numRegions = n / 2;
+        // Gera a lista de adjacência
+        vector<vector<tuple<int, Edge*>>> adjacencyList;
+        generateAdjacencyList(vertices, edges, adjacencyList);
 
-            // Chama a função para medir o tempo para cada região
-            for (int regionCode = 1; regionCode <= numRegions; ++regionCode) {
-                measureTime(regionCode, edges, vertices);
+        unordered_map<int, vector<Edge*>> edgesByCepMap;
+
+        // Agrupa arestas
+        for (const auto& edge : edges) {
+            edgesByCepMap[edge->id_zipCode()].push_back(edge);
+        }
+
+        // Converte unordered_map para vector<vector<Edge*>>
+        vector<vector<Edge*>> edgesGrouped;
+        for (const auto& [key, edgeList] : edgesByCepMap) {
+            edgesGrouped.push_back(edgeList);
+        }
+
+        // Medir tempo de execução
+        auto startTime = high_resolution_clock::now();
+
+        vector<Vertex*> optimalVertices;
+        for (size_t i = 0; i < edgesGrouped.size(); i++) {
+            const vector<Edge*>& regionEdges = edgesGrouped[i];
+            vector<vector<Edge*>> currentRegion = {regionEdges};
+            
+            cout << "Procurando vértice ótimo para a região " << i + 1 << "..." << endl;
+            // outputFile << "Procurando vértice ótimo para a região " << i + 1 << "..." << endl;
+
+            Vertex* optimalVertex = findOptimalVertexFast(currentRegion, adjacencyList);
+
+            if (optimalVertex) {
+                cout << "Vértice ótimo encontrado para a região " << i + 1 
+                     << ": ID = " << optimalVertex->id() << endl;
+                // outputFile << "Vértice ótimo encontrado para a região " << i + 1 
+                //           << ": ID = " << optimalVertex->id() << endl;
+                optimalVertices.push_back(optimalVertex);
+            } else {
+                cout << "Nenhum vértice ótimo encontrado para a região " << i + 1 << "." << endl;
+                // outputFile << "Nenhum vértice ótimo encontrado para a região " << i + 1 << "." << endl;
             }
         }
 
-    } catch (const exception& e) {
-        cout << "Erro: " << e.what() << endl;
+        auto endTime = high_resolution_clock::now();
+        duration<double> elapsedTime = endTime - startTime;
+
+        cout << "Tempo de execução para " << fileName << ": " 
+             << elapsedTime.count() << " segundos." << endl;
+        outputFile << "Tempo de execução para " << fileName << ": " 
+                   << elapsedTime.count() << " segundos." << endl;
+
+        // Limpeza de memória
+        for (Vertex* vertex : vertices) delete vertex;
+        for (Edge* edge : edges) delete edge;
     }
 
-    // Limpeza de memória
-    for (auto& vertex : vertices) {
-        delete vertex;
-    }
-    for (auto& edge : edges) {
-        delete edge;
-    }
+    // Fecha o arquivo de saída
+    outputFile.close();
+}
 
+int main() {
+    testPerformance();
     return 0;
 }

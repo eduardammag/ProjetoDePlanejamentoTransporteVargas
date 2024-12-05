@@ -1,0 +1,4 @@
+Tempo de execução para city_graph_10x10.json: 0.0203462 segundos.
+Tempo de execução para city_graph_20x20.json: 0.34115 segundos.
+Tempo de execução para city_graph_30x30.json: 1.83185 segundos.
+Tempo de execução para city_graph_40x40.json: 5.49026 segundos.
