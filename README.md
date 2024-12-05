@@ -17,8 +17,9 @@ Foram feitas alguns testes com tamanhos diferentes de grafo, por isso na pasta g
 
 
 ### Tarefa 1:
-Foi feito uma função para definir as estações de metrô (sendo uma em cada região) de modo que a escolha de cada estação busca minimizar a distância entre ela e o ponto mais longe da sua respectiva região. 
-Além disso, foi projetado um algoritmo capaz de definir os segmentos a serem escavados, de forma que o custo para a cidade seja mínimo, mas todas as estações definidas sejam conectadas.
+Foi feito uma função para definir as estações de metrô (sendo uma em cada região) de modo que a escolha de cada estação busca minimizar a distância entre ela e o ponto mais longe da sua respectiva região. Isso foi feito da seguinte forma: Dado o grafo não direcionado fortemente conectado que representa a cidade dividida em regiões, onde cada vértice corresponde a um cruzamento na cidade e cada aresta possui um peso indicando a distância, encontrar para cada região o vértice que minimiza a maior distância até qualquer outro vértice da mesma região.
+
+Além disso, foi projetado um algoritmo capaz de definir os segmentos a serem escavados, de forma que o custo para a cidade seja mínimo, mas todas as estações definidas sejam conectadas. Isso foi feito criando um sistema otimizado de linhas de metrô conectando uma série de estações (também chamado de terminais), minimizando o custo total de construção. 
 
 Dentro dessa pasta, há uma outra pasta que contém os arquivos que analisam o tempo de execução das funções criadas nessa tarefa.
 
