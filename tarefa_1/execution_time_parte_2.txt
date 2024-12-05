@@ -1,0 +1,4 @@
+
+Tempo de execução para conect_metro no arquivo city_graph_10x10.json: 0.00039179 segundos.
+Tempo de execução para conect_metro no arquivo city_graph_20x20.json: 0.00331083 segundos.
+Tempo de execução para conect_metro no arquivo city_graph_30x30.json: 0.0104651 segundos.
