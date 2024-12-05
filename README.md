@@ -37,5 +37,5 @@ Assim como para a tarefa 1, nessa pasta há uma outra pasta que contém os arqui
 
 
 ### Execução: 
-Todo o projeto foi repetidas vezes testado no compilador online ''Online GDB''. Este, por sua vez, não recebe a estrutura de pastas, logo, para rodar o código completo, deve-se colocar todos os arquivos em um mesmo diretório.       
+Todo o projeto foi repetidas vezes testado no compilador online ''Online GDB''. Este, por sua vez, não recebe a estrutura de pastas, logo, para rodar o código completo, deve-se colocar todos os arquivos em um mesmo diretório. Organizamos em pastas para melhor a compreensão sobre qual tarefa se refere a qual código, mas na hora de rodar, essa estrutura foi desfeita.  
 
